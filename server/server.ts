@@ -1,9 +1,11 @@
 import express from "express";
 import path from "path";
+import dotenv from 'dotenv'
+dotenv.config();
+
+//no require in ts, there is just an import 
 const app = express();
 let PORT = 8080
-
-// dotenv.config();
 app.use(express.json())
 
 // app.use(express.static(path.join(__dirname, '../client')));
