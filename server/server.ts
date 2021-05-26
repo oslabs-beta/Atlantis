@@ -24,12 +24,13 @@ app.use(express.json());
 // app.use(express.static(path.join(__dirname, '../client')));
 // test route to check if our connection to the DB is working.
 app.get('/testing', (req, res) => {
-  const queryParams = 'Erik';
-  const queryString = `SELECT * FROM users
-                       WHERE name = $1;`;
-  db.query(queryString, queryParams, (err: object, result: any) => {
+  const queryParams: string = 'Erik';
+  const queryString: string = `SELECT * FROM public.user
+                            WHERE name = $1`;
+
+  db.query(queryString, [queryParams], (err: object, result: any) => {
     if (err) return res.send(err);
-    res.send(result);
+    res.send(result.rows);
   });
 });
 
