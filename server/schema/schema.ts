@@ -9,8 +9,6 @@ import {
 } from 'graphql';
 const db = require('../model');
 
-
-
 const UserType:any = new GraphQLObjectType({
   name: "Users",
   fields: ()=>({
