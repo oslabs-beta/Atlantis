@@ -12,28 +12,25 @@ const db = require('./model');
 import { graphqlHTTP } from 'express-graphql';
 import { hasUncaughtExceptionCaptureCallback, nextTick } from 'process';
 import { graphql } from 'graphql';
-
+const morgan = require('morgan');
 const schema = require('./schema/schema');
 
 dotenv.config();
 
 const app: Application = express();
 app.use(express.json());
+app.use(morgan('dev'));
 
 const PORT = process.env.PORT || 3000;
-//const REDIS_PORT: any = process.env.REDIS_PORT;
-//const REDIS_PORT: number = parseInt(process.env.REDIS_PORT as string, 6379);
-//console.log(REDIS_PORT)
-//const client = redis.createClient(parseInt(REDIS_PORT));
 
 //we might need to configure this line somehow for users running behind a proxy
 // app.set('trust proxy', 1)
 
 const RedisStore = connectRedis(session);
-//const redisClient = redis.createClient();
+
 const redisClient = redis.createClient({
   host: 'localhost',
-  port: 6379,
+  port: Number(process.env.REDIS_PORT),
 });
 
 app.use(
@@ -45,7 +42,6 @@ app.use(
     secret: 'foundAtlantis',
     saveUninitialized: false,
     cookie: {
-      // 10 years
       maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
       httpOnly: true,
       secure: false,
@@ -63,55 +59,55 @@ app.use(
   })
 );
 
-const saveQuery = (req: Request, res: Response, next: NextFunction) => {
-  if (res.locals.query) next();
-  // save the response.data to res.locals.query
-  const query: string = '{companies{name}}';
+const getQuery = (req: Request, res: Response, next: NextFunction) => {
+  if (res.locals.graphQLResponse) return next();
+  const query: string = '{users{name}}';
   graphql(schema, query).then((response) => {
-    console.log('saveQuery middleware responded with', response.data);
-    res.locals.query = response.data;
+    console.log('getQuery middleware responded with', response.data);
+    res.locals.query = query;
+    res.locals.graphQLResponse = response.data;
+    (req.session as any)[res.locals.query] = res.locals.graphQLResponse;
     next();
   });
 };
 
-app.get('/testing', saveQuery, (req, res, next) => {
-  // call saveQuery which will create an object and save it under
-  // res.locals.query
-  const pastQueries: any[] = [];
-  pastQueries.push(res.locals.query);
-  // push res.locals.query into the pastQueries array
-  // update the res.session.pastQueries to our new pastQueries
-  (req.session as any).pastQueries = pastQueries;
-  // tell client query has been saved
-  res.send('query should be in redis');
+app.get('/testing', getQuery, (req, res, next) => {
+  console.log('this is going to be saved as redis key', res.locals.query);
+  console.log(
+    'this is going to be saved as redis value',
+    res.locals.graphQLResponse
+  );
+  res.send(res.locals.graphQLResponse);
 });
 
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
-  // find session data pass to redis keys
-  console.log('session key is', req.session);
-  redisClient.keys('sess:*', (error, keys) => {
-    console.log('redis keys are', keys);
-    res.locals.query = keys;
-    next();
+  console.log('req.sessionID is ', req.sessionID);
+  redisClient.get(`sess:${req.sessionID}`, (error, values) => {
+    if (error) {
+      console.log('redis error', error);
+      res.send(error);
+    }
+    const redisValues = JSON.parse(`${values}`);
+
+    if (!redisValues['{users{name}}']) {
+      console.log('query was not a key in redis session');
+      return next();
+    } else {
+      console.log('query was found in cache');
+      const cachedValue = redisValues['{users{name}}'];
+      console.log('redis cachedValue is ', cachedValue);
+      res.locals.graphQLResponse = cachedValue;
+      next();
+    }
   });
-  // find session key, and check for value of the key in redis
-  // if value contains query:
-  // save value to res.locals.query
-  // if not call next
 };
 
-app.get('/cachetest', checkRedis, saveQuery, (req, res, next) => {
-  // if res.locals exists don't make graphql query
-  res.send(res.locals.query);
+app.get('/cachetest', checkRedis, getQuery, (req, res, next) => {
+  res.send(res.locals.graphQLResponse);
 });
 
-const initializeSession = (req: Request, res: Response, next: NextFunction) => {
-  const pastQueries: any[] = [];
-  (req.session as any).pastQueries = pastQueries;
-  next();
-};
-
-app.get('/', initializeSession, (req: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
+  (req.session as any).sample = 'sample';
   return res.status(200).sendFile(path.join(__dirname, './views/index.html'));
 });
 
