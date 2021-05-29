@@ -112,7 +112,7 @@ const RootQueryType = new GraphQLObjectType({
         return result.rows[0];
       },
     },
-    //projects return all projects
+    //projects return all projects   
     projects: {
       type: new GraphQLList(ProjectType),
       description: 'list of projects',
@@ -183,7 +183,7 @@ const mutation: any = new GraphQLObjectType({
     },
 
     updateUser: {
-      type: UserType,
+      type: UserType,  
       args: {
         user_id: { type: GraphQLInt },
         name: { type: GraphQLString },
@@ -191,7 +191,7 @@ const mutation: any = new GraphQLObjectType({
       },
       resolve: async (parent, { user_id, name, company_id }) => {
         const result = await db.query(
-          'UPDATE public.user (name, company_id) VALUES ( $1, $2 )  WHERE user_id=$3 RETURNING *',
+          'UPDATE public.user SET name=$1, company_id=$2 WHERE user_id=$3 RETURNING *;',
           [name, company_id, user_id]
         );
         console.log(result.rows[0]);
@@ -202,13 +202,13 @@ const mutation: any = new GraphQLObjectType({
     updateCompany: {
       type: CompanyType,
       args: {
+        company_id: { type: GraphQLInt },
         name: { type: GraphQLString },
         description: { type: GraphQLString },
-        compnay_id: { type: GraphQLInt },
       },
-      resolve: async (parent, { name, description, company_id }) => {
+      resolve: async (parent, { company_id, name, description }) => {
         const result = await db.query(
-          ' UPDATE public.company (name, description) VALUES ( $1, $2) WHERE company_id=$3 RETURNING *',
+          'UPDATE public.company SET name=$1, description=$2 WHERE company_id=$3 RETURNING *;',
           [name, description, company_id]
         );
         console.log(result.rows[0]);
@@ -221,14 +221,15 @@ const mutation: any = new GraphQLObjectType({
         project_name: { type: GraphQLString },
         company_id: { type: GraphQLInt },
         project_description: { type: GraphQLString },
+        project_id: { type: GraphQLInt },
       },
       resolve: async (
         parent,
-        { project_name, company_id, project_description, project_id }
+        {  project_name, company_id, project_description, project_id }
       ) => {
         const result = await db.query(
-          'INSERT INTO public.project (project_name, company_id,  project_description) VALUES ( $1, $2, $3) RETURNING *',
-          [project_name, company_id, project_description]
+          'UPDATE public.project SET project_name=$1, company_id=$2, project_description=$3 WHERE project_id=$4 RETURNING *;',
+          [project_name, company_id, project_description, project_id]
         );
         console.log(result.rows[0]);
         return result.rows[0];
@@ -242,7 +243,7 @@ const mutation: any = new GraphQLObjectType({
       },
       resolve: async (parent, { user_id }) => {
         const result = await db.query(
-          'DELETE FROM public.user WHERE user_id=$1',
+          'DELETE FROM public.user WHERE user_id=$1 RETURNING *',
           [user_id]
         );
         console.log(result.rows[0]);
@@ -257,7 +258,7 @@ const mutation: any = new GraphQLObjectType({
       },
       resolve: async (parent, { company_id }) => {
         const result = await db.query(
-          'DELETE FROM public.company WHERE company_id=$1',
+          'DELETE FROM public.company WHERE company_id=$1 RETURNING *',
           [company_id]
         );
         console.log(result.rows[0]);
@@ -271,7 +272,7 @@ const mutation: any = new GraphQLObjectType({
       },
       resolve: async (parent, { project_id }) => {
         const result = await db.query(
-          'DELETE FROM public.project WHERE project_id=$1',
+          'DELETE FROM public.project WHERE project_id=$1 RETURNING *',
           [project_id]
         );
         console.log(result.rows[0]);
