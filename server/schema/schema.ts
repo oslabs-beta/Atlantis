@@ -8,6 +8,7 @@ import {
   GraphQLInputObjectType,
 } from 'graphql';
 const db = require('../model');
+import fetch from 'node-fetch';
 
 const UserType: any = new GraphQLObjectType({
   name: 'Users',
@@ -84,6 +85,7 @@ const RootQueryType = new GraphQLObjectType({
         return result.rows;
       },
     },
+
     //users ruturn all usuers
     users: {
       type: new GraphQLList(UserType),
@@ -98,14 +100,14 @@ const RootQueryType = new GraphQLObjectType({
     },
     project: {
       type: ProjectType,
-      description: 'project ',
+      description: 'project',
       args: {
         project_id: { type: GraphQLInt },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, { project_id }) => {
         const result = await db.query(
           'SELECT * FROM project WHERE  project_id = $1',
-          [args.project_id]
+          [project_id]
         );
         return result.rows[0];
       },
@@ -125,8 +127,163 @@ const RootQueryType = new GraphQLObjectType({
   }),
 });
 
+const mutation: any = new GraphQLObjectType({
+  name: 'mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        name: { type: GraphQLString },
+        company_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { name, company_id }) => {
+        const result = await db.query(
+          'INSERT INTO public.user (name, company_id) VALUES ( $1, $2) RETURNING *',
+          [name, company_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+
+    addCompany: {
+      type: CompanyType,
+      args: {
+        name: { type: GraphQLString },
+        description: { type: GraphQLString },
+      },
+      resolve: async (parent, { name, description }) => {
+        console.log('parent is ', parent);
+        const result = await db.query(
+          'INSERT INTO public.company (name, description) VALUES ( $1, $2) RETURNING *',
+          [name, description]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+    addProject: {
+      type: ProjectType,
+      args: {
+        project_name: { type: GraphQLString },
+        company_id: { type: GraphQLInt },
+        project_description: { type: GraphQLString },
+      },
+      resolve: async (
+        parent,
+        { project_name, company_id, project_description }
+      ) => {
+        const result = await db.query(
+          'INSERT INTO public.project (project_name, company_id,  project_description) VALUES ( $1, $2, $3) RETURNING *',
+          [project_name, company_id, project_description]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+
+    updateUser: {
+      type: UserType,
+      args: {
+        user_id: { type: GraphQLInt },
+        name: { type: GraphQLString },
+        company_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { user_id, name, company_id }) => {
+        const result = await db.query(
+          'UPDATE public.user (name, company_id) VALUES ( $1, $2 )  WHERE user_id=$3 RETURNING *',
+          [name, company_id, user_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+
+    updateCompany: {
+      type: CompanyType,
+      args: {
+        name: { type: GraphQLString },
+        description: { type: GraphQLString },
+        compnay_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { name, description, company_id }) => {
+        const result = await db.query(
+          ' UPDATE public.company (name, description) VALUES ( $1, $2) WHERE company_id=$3 RETURNING *',
+          [name, description, company_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+    updateProject: {
+      type: ProjectType,
+      args: {
+        project_name: { type: GraphQLString },
+        company_id: { type: GraphQLInt },
+        project_description: { type: GraphQLString },
+      },
+      resolve: async (
+        parent,
+        { project_name, company_id, project_description, project_id }
+      ) => {
+        const result = await db.query(
+          'INSERT INTO public.project (project_name, company_id,  project_description) VALUES ( $1, $2, $3) RETURNING *',
+          [project_name, company_id, project_description]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+
+    deleteUser: {
+      type: UserType,
+      args: {
+        user_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { user_id }) => {
+        const result = await db.query(
+          'DELETE FROM public.user WHERE user_id=$1',
+          [user_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+
+    deleteCompany: {
+      type: CompanyType,
+      args: {
+        company_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { company_id }) => {
+        const result = await db.query(
+          'DELETE FROM public.company WHERE company_id=$1',
+          [company_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+    deleteProject: {
+      type: ProjectType,
+      args: {
+        project_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, { project_id }) => {
+        const result = await db.query(
+          'DELETE FROM public.project WHERE project_id=$1',
+          [project_id]
+        );
+        console.log(result.rows[0]);
+        return result.rows[0];
+      },
+    },
+  },
+});
+
 const schema = new GraphQLSchema({
   query: RootQueryType,
+  mutation,
 });
 
 module.exports = schema;

@@ -61,12 +61,10 @@ app.use(
 
 const getQuery = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
-  const query: string = '{users{name}}';
-  graphql(schema, query).then((response) => {
+  graphql(schema, req.params.query).then((response) => {
     console.log('getQuery middleware responded with', response.data);
-    res.locals.query = query;
     res.locals.graphQLResponse = response.data;
-    (req.session as any)[res.locals.query] = res.locals.graphQLResponse;
+    (req.session as any)[req.params.query] = res.locals.graphQLResponse;
     next();
   });
 };
@@ -87,27 +85,27 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
       console.log('redis error', error);
       res.send(error);
     }
+    console.log('req params are', req.params.query);
     const redisValues = JSON.parse(`${values}`);
-
-    if (!redisValues['{users{name}}']) {
+    if (!redisValues[req.params.query]) {
       console.log('query was not a key in redis session');
       return next();
     } else {
       console.log('query was found in cache');
-      const cachedValue = redisValues['{users{name}}'];
+      const cachedValue = redisValues[req.params.query];
       console.log('redis cachedValue is ', cachedValue);
       res.locals.graphQLResponse = cachedValue;
       next();
     }
   });
 };
-
-app.get('/cachetest', checkRedis, getQuery, (req, res, next) => {
+// cachetest?{users{name}}
+app.get('/cachetest/:query', checkRedis, getQuery, (req, res, next) => {
   res.send(res.locals.graphQLResponse);
 });
 
 app.get('/', (req: Request, res: Response) => {
-  (req.session as any).sample = 'sample';
+  (req.session as any).initalized = true;
   return res.status(200).sendFile(path.join(__dirname, './views/index.html'));
 });
 
