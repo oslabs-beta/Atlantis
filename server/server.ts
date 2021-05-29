@@ -19,7 +19,7 @@ dotenv.config();
 const app: Application = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3001;
 //const REDIS_PORT: any = process.env.REDIS_PORT;
 //const REDIS_PORT: number = parseInt(process.env.REDIS_PORT as string, 6379);
 //console.log(REDIS_PORT)
