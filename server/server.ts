@@ -1,6 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 //the extra variables available from express define express types
-
 import path from 'path';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
