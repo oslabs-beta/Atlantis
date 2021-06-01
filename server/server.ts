@@ -27,10 +27,60 @@ const PORT = process.env.PORT || 3000;
 
 const RedisStore = connectRedis(session);
 
+
+
+//_________________________________REDIS SUBSCRIBER_________________________________//
 const redisClient = redis.createClient({
   host: 'localhost',
   port: Number(process.env.REDIS_PORT),
 });
+
+
+//______________________Subscribe to an event_________________________//
+redisClient.on('mutation', (event, query) => {
+  try {
+    const json = JSON.parse(query)
+  }catch(err){
+    console.log(err)
+  }
+})
+
+
+//_________________________________REDIS PUBLISHER_________________________________//
+//_____________SERVER SIDE CACHE(AKA DB CACHE FOR ERIK & SETT)_______________//
+/*
+    Sample Redis object
+sess:sdjflkasdjlfk = {
+  cookie: dskjflajfldjaslf,
+  {companies{name}} = {amazon{nike}},
+  {projects{name}} = {ecommerce{shoes}}
+
+  //key is the query     result is the value from query
+}
+
+*/
+const redisPublisher = redis.createClient({
+  host: 'localhost',
+  port: Number(process.env.REDIS_PORT),
+});
+
+//___________________Publish an event____________________// listens for mutation and publishes to subscribers, broadcaster only sends string
+
+
+const publisherQuery = (req: Request, res: Response, next: NextFunction) => {
+  
+    const key: string = req.params.query
+    const value = res.locals.graphQLResponse  //does this get saved at this point???
+
+    redisPublisher.publish('mutation', JSON.stringify({
+  
+      dummyQuery : 'dummy query value' 
+    
+    }))
+  
+}
+
+
 
 app.use(
   session({
