@@ -11,6 +11,9 @@ const db = require('./model');
 import { graphqlHTTP } from 'express-graphql';
 import { hasUncaughtExceptionCaptureCallback, nextTick } from 'process';
 import { graphql } from 'graphql';
+import { exists } from 'fs';
+import { stringify } from 'querystring';
+import { SSL_OP_CIPHER_SERVER_PREFERENCE } from 'constants';
 const morgan = require('morgan');
 const schema = require('./schema/schema');
 
@@ -24,31 +27,51 @@ const PORT = process.env.PORT || 3000;
 
 //we might need to configure this line somehow for users running behind a proxy
 // app.set('trust proxy', 1)
-
-const RedisStore = connectRedis(session);
-
 const redisClient = redis.createClient({
   host: 'localhost',
-  port: Number(process.env.REDIS_PORT),
+  port: 6379,
+});
+const RedisStore = connectRedis(session);
+
+//_________________________________REDIS SUBSCRIBER_________________________________//
+const redisSubscriber = redis.createClient();
+const redisPublisher = redis.createClient();
+
+//______________________Subscribe to an event_________________________//
+redisSubscriber.on('message', (event, data) => {
+  // event = {compnaies{name}}, data = redis response
+  try {
+    console.log('Received changed data :' + data);
+    // find this query in the redis client,
+    redisClient.del(event, (err, res) => {
+      const result = res === 1 ? 'Deleted Successfully' : 'not deleted';
+      console.log(result);
+    });
+  } catch (err) {
+    console.log(err);
+  }
 });
 
-app.use(
-  session({
-    store: new RedisStore({
-      client: redisClient,
-      disableTouch: true,
-    }),
-    secret: 'foundAtlantis',
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    },
-    resave: false,
-  })
-);
+//___________________Publish an event____________________// listens for mutation and publishes to subscribers, broadcaster only sends string
+
+const publisherQuery = (req: Request, res: Response, next: NextFunction) => {
+  console.log('inside publish query');
+  // req.params.query == {{companies}name}
+  // Publish the change to redis
+  //check if the params contains "mutation", skip
+  if (req.params.query.slice(0, 8) !== 'mutation') return next();
+  // mutation{addCompany(name:"Easyf", company_id: 2) { user_id name company_id }}
+  if (req.params.query.slice(9, 19) == 'addCompany') {
+    redisPublisher.publish('addCompany', 'event was emitted');
+    setTimeout(() => {
+      next();
+    }, 5);
+  } else {
+    next();
+  }
+};
+
+// { query, variables, operationName, raw }
 
 app.use(
   '/graphql',
@@ -60,10 +83,30 @@ app.use(
 
 const getQuery = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
+  // query={{companies}name}
   graphql(schema, req.params.query).then((response) => {
     console.log('getQuery middleware responded with', response.data);
+    // where we would subscribe to updates to this query
+    // this key is subscribed to any mutations to companies
+    // companies{name} // addCompany, updateCompany, deleteCompany
+    // mutation{addCompany(name:"Easyf", company_id: 2) { user_id name company_id }}
+    // req.params.query = {companies{name}}
+    let tableRoot = `${req.params.query}`;
+    tableRoot = tableRoot.slice(1, 9);
+    if (tableRoot == 'companies') {
+      // subscribe to addCompany, deleteCompany..
+      redisSubscriber.subscribe('addCompany');
+      redisSubscriber.subscribe('updateCompany');
+      redisSubscriber.subscribe('deleteCompany');
+    }
     res.locals.graphQLResponse = response.data;
-    (req.session as any)[req.params.query] = res.locals.graphQLResponse;
+    // store to redis
+    // sets the query as the key, with a 10 minutes expiration value from the first query.
+    redisClient.setex(
+      req.params.query,
+      600,
+      JSON.stringify(res.locals.graphQLResponse)
+    );
     next();
   });
 };
@@ -78,33 +121,37 @@ app.get('/testing', getQuery, (req, res, next) => {
 });
 
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
-  console.log('req.sessionID is ', req.sessionID);
-  redisClient.get(`sess:${req.sessionID}`, (error, values) => {
+  console.log('req.params.query is ', req.params.query);
+
+  redisClient.get(`${req.params.query}`, (error, values) => {
     if (error) {
       console.log('redis error', error);
       res.send(error);
     }
-    console.log('req params are', req.params.query);
-    const redisValues = JSON.parse(`${values}`);
-    if (!redisValues[req.params.query]) {
+    if (!values) {
       console.log('query was not a key in redis session');
       return next();
     } else {
       console.log('query was found in cache');
-      const cachedValue = redisValues[req.params.query];
-      console.log('redis cachedValue is ', cachedValue);
-      res.locals.graphQLResponse = cachedValue;
+      const redisValues = JSON.parse(`${values}`);
+      console.log('redis Values are', redisValues);
+      res.locals.graphQLResponse = redisValues;
       next();
     }
   });
 };
 // cachetest?{users{name}}
-app.get('/cachetest/:query', checkRedis, getQuery, (req, res, next) => {
-  res.send(res.locals.graphQLResponse);
-});
+app.get(
+  '/cachetest/:query',
+  publisherQuery,
+  checkRedis,
+  getQuery,
+  (req, res, next) => {
+    res.send(res.locals.graphQLResponse);
+  }
+);
 
 app.get('/', (req: Request, res: Response) => {
-  (req.session as any).initalized = true;
   return res.status(200).sendFile(path.join(__dirname, './views/index.html'));
 });
 
