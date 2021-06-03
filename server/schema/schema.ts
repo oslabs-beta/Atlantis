@@ -9,6 +9,7 @@ import {
 } from 'graphql';
 const db = require('../model');
 import fetch from 'node-fetch';
+import { Args } from 'type-graphql';
 
 const UserType: any = new GraphQLObjectType({
   name: 'Users',
@@ -112,7 +113,7 @@ const RootQueryType = new GraphQLObjectType({
         return result.rows[0];
       },
     },
-    //projects return all projects   
+    //projects return all projects
     projects: {
       type: new GraphQLList(ProjectType),
       description: 'list of projects',
@@ -183,7 +184,7 @@ const mutation: any = new GraphQLObjectType({
     },
 
     updateUser: {
-      type: UserType,  
+      type: UserType,
       args: {
         user_id: { type: GraphQLInt },
         name: { type: GraphQLString },
@@ -225,7 +226,7 @@ const mutation: any = new GraphQLObjectType({
       },
       resolve: async (
         parent,
-        {  project_name, company_id, project_description, project_id }
+        { project_name, company_id, project_description, project_id }
       ) => {
         const result = await db.query(
           'UPDATE public.project SET project_name=$1, company_id=$2, project_description=$3 WHERE project_id=$4 RETURNING *;',
