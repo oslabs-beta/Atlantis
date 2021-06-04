@@ -81,7 +81,9 @@ const RootQueryType = new GraphQLObjectType({
     companies: {
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
-      resolve: async () => {
+      resolve: async (obj, args, context, info) => {
+        console.log('this is the info',context);
+        // console.log('this is the context.rows',context);
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },
@@ -94,9 +96,11 @@ const RootQueryType = new GraphQLObjectType({
       args: {
         company_id: { type: GraphQLInt },
       },
-      resolve: async () => {
-        const result = await db.query('SELECT * FROM public.user');
-        return result.rows;
+      resolve: async (obj, args, context, info) => {
+        console.log('this is the info',info);
+        console.log(context.rows);
+        // const result = await db.query('SELECT * FROM public.user');
+        // return result.rows;
       },
     },
     project: {

@@ -143,7 +143,6 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
 // cachetest?{users{name}}
 app.get(
   '/cachetest/:query',
-  publisherQuery,
   checkRedis,
   getQuery,
   (req, res, next) => {
