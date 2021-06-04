@@ -97,10 +97,15 @@ const RootQueryType = new GraphQLObjectType({
         company_id: { type: GraphQLInt },
       },
       resolve: async (obj, args, context, info) => {
-        console.log('this is the info',info);
-        console.log(context.rows);
-        // const result = await db.query('SELECT * FROM public.user');
-        // return result.rows;
+        // console.log('this is the info',info);
+        // console.log(context.rows);
+        if (Object.keys(args).length !== 0) {
+          console.log('here are args', args);
+          const result = await db.query('SELECT * FROM public.user WHERE company_id = $1', [args.company_id]);
+          return result.rows;
+        }
+        const result = await db.query('SELECT * FROM public.user');
+        return result.rows;
       },
     },
     project: {
