@@ -51,8 +51,7 @@ const getMutationMap = (schema: any)=> {
 
   return mutationMap;
 }
-// console.log(getMutationMap(schema))
-
+console.log('erikmut map', getMutationMap(schema))
 
 const getQueryMap = (schema: any)=> {
   const queryMap: any = {};
@@ -94,7 +93,6 @@ const redisClient = redis.createClient({
 });
 const RedisStore = connectRedis(session);
 
-
 app.use(
   '/graphql',
   graphqlHTTP({
@@ -103,25 +101,43 @@ app.use(
   })
 );
 
-
-
 const getQuery = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
   // query={{companies}name}
-  graphql(schema, req.params.query).then((response) => {
+  console.log('about to make GQL query of ', res.locals.querymade)
+  graphql(schema, res.locals.querymade).then((response) => {
     // console.log('getQuery middleware responded with', response.data);
     // where we would subscribe to updates to this query
     // this key is subscribed to any mutations to companies
     // companies{name} // addCompany, updateCompany, deleteCompany
     // mutation{addCompany(name:"Easyf", company_id: 2) { user_id name company_id }}
     // req.params.query = {companies{name}}
-    let tableRoot = `${req.params.query}`;
-    tableRoot = tableRoot.slice(1, 9);
+    // let tableRoot = `${req.params.query}`;
+    // tableRoot = tableRoot.slice(1, 9);
     res.locals.graphQLResponse = response.data;
-    // store to redis
-    // sets the query as the key, with a 10 minutes expiration value from the first query.
+    console.log("graphQL responded with", res.locals.graphQLResponse);
+    const subscriptions = ['Users', 'Companies']
+    // subscribe the query to mutations of type Subscription
+    for (let key in subscriptions) {
+      redisClient.get(`${subscriptions[key]}`, (error, values) => {
+        if (error) {
+          console.log('redis error', error);
+          res.send(error);
+        }
+        // Case where this query is the first to subscribe to this type.
+        if (!values){
+          const subs =[res.locals.querymade]
+          redisClient.set(subscriptions[key], JSON.stringify(subs))
+        } else {
+          // Case where other queries are also subscribed to changes of this type.
+          const subs = JSON.parse(`${values}`)
+          subs.push(res.locals.querymade)
+          redisClient.set(subscriptions[key], JSON.stringify(subs))
+        }
+      })
+    }
     redisClient.setex(
-      req.params.query,
+      res.locals.querymade,
       600,
       JSON.stringify(res.locals.graphQLResponse)
     );
@@ -210,6 +226,7 @@ const parseAST = (AST: any)=> {
        *  queried fields.
        */
       if (parent.kind === 'Field') {
+        // console.log(parent, "Parent Field")
         // loop through selections to collect fields
         const tempObject: any = {};
         for (let field of node.selections) {
@@ -223,33 +240,86 @@ const parseAST = (AST: any)=> {
             ? (prev[curr] = tempObject) // set value
             : (prev[curr] = prev[curr]); // otherwise, if index exists, keep value
         }, proto);
+        protoObj["__typename"] = true;
+        // console.log("ProtoObj,,,,,," ,protoObj);
+
+
       }
     },
   });
+  
   return { proto, protoArgs, operationType };
 
 }
 
 
 
+const ProtoQueryString = (obj:any, protoArgs:any) => {
+  const argsToQuery = (protoArgs:any) => {
+    let string = '';
+    // fuck typescript  
+    for (let key in protoArgs) {
+      for (let innerKey in protoArgs[key]) {
+        string += innerKey + ': ' + '"' + protoArgs[key][innerKey] + '"' + ' ';
+      }
+    }
+    return '(' + string + ')';
+  };
+
+  let mainString = '';
+  for (let key in obj) {
+    if (typeof obj[key] !== 'object') {
+      mainString += ' ' + key + ' ';
+    } else {
+      mainString += ' ' + key + ' ';
+      if (typeof protoArgs[key] == 'object') {
+        const inner = argsToQuery(protoArgs);
+        mainString += inner;
+      }
+      mainString += ProtoQueryString(obj[key], {});
+    }
+  }
+  return '{' + mainString + '}';
+};
 
 
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
+
+
   // console.log('req.params.query is ', req.params.query);
+  console.log('query string',req.params.query)
   const AST: any = parse(req.params.query);
-  const result: any = parseAST(AST);
+  console.log('made it out of parse')
+  const { proto, protoArgs, operationType }: any = parseAST(AST);
+  console.log('made it out of parseAST')
+  console.log('erik Proto', proto)
+  console.log('erik ProtoArgs', protoArgs)
+
+  
+  // result is proto
   // console.log("AST", AST.definitions[0].selectionSet.selections[0].selectionSet)
-    console.log("AST", AST.definitions[0].selectionSet.selections[0].selectionSet.selections[3].selectionSet.selections)
-
+    // console.log("AST", AST.definitions[0].selectionSet)
   // console.log("Name type!!!!!!!!!!!!!",result.proto);
+  
 
-  redisClient.get(`${req.params.query}`, (error, values) => {
+  // create query string
+  let querymade = ProtoQueryString(proto, protoArgs);
+  console.log("proto to query" ,querymade);
+  if (operationType == 'mutation') {
+    querymade = 'mutation' + querymade
+    console.log('querymade is', querymade)
+  }
+
+
+  
+  redisClient.get(querymade, (error, values) => {
     if (error) {
       console.log('redis error', error);
       res.send(error);
     }
     if (!values) {
       console.log('query was not a key in redis session');
+      res.locals.querymade = querymade;
       return next();
     } else {
       console.log('query was found in cache');
@@ -260,6 +330,18 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
     }
   });
 };
+
+
+const checkMutation = (req: Request, res: Response, next: NextFunction) => { 
+
+
+
+}
+
+
+
+
+
 
 // cachetest?{users{name}}
 app.get(
