@@ -51,7 +51,7 @@ const getMutationMap = (schema: any)=> {
 
   return mutationMap;
 }
-console.log(getMutationMap(schema))
+// console.log(getMutationMap(schema))
 
 
 const getQueryMap = (schema: any)=> {
@@ -80,7 +80,7 @@ const getQueryMap = (schema: any)=> {
 
   return queryMap;
 }
-console.log("GET QUERY MAP", getQueryMap(schema));
+// console.log("GET QUERY MAP", getQueryMap(schema));
 
 // console.log("SChema",schema);
 
@@ -94,45 +94,6 @@ const redisClient = redis.createClient({
 });
 const RedisStore = connectRedis(session);
 
-//_________________________________REDIS SUBSCRIBER_________________________________//
-const redisSubscriber = redis.createClient();
-const redisPublisher = redis.createClient();
-
-//______________________Subscribe to an event_________________________//
-redisSubscriber.on('message', (event, data) => {
-  // event = {compnaies{name}}, data = redis response
-  try {
-    console.log('Received changed data :' + data);
-    // find this query in the redis client,
-    redisClient.del(event, (err, res) => {
-      const result = res === 1 ? 'Deleted Successfully' : 'not deleted';
-      console.log(result);
-    });
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-//___________________Publish an event____________________// listens for mutation and publishes to subscribers, broadcaster only sends string
-
-const publisherQuery = (req: Request, res: Response, next: NextFunction) => {
-  console.log('inside publish query');
-  // req.params.query == {{companies}name}
-  // Publish the change to redis
-  //check if the params contains "mutation", skip
-  if (req.params.query.slice(0, 8) !== 'mutation') return next();
-  // mutation{addCompany(name:"Easyf", company_id: 2) { user_id name company_id }}
-  if (req.params.query.slice(9, 19) == 'addCompany') {
-    redisPublisher.publish('addCompany', 'event was emitted');
-    setTimeout(() => {
-      next();
-    }, 5);
-  } else {
-    next();
-  }
-};
-
-// { query, variables, operationName, raw }
 
 app.use(
   '/graphql',
@@ -141,6 +102,8 @@ app.use(
     graphiql: true,
   })
 );
+
+
 
 const getQuery = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
@@ -154,12 +117,6 @@ const getQuery = (req: Request, res: Response, next: NextFunction) => {
     // req.params.query = {companies{name}}
     let tableRoot = `${req.params.query}`;
     tableRoot = tableRoot.slice(1, 9);
-    if (tableRoot == 'companies') {
-      // subscribe to addCompany, deleteCompany..
-      redisSubscriber.subscribe('addCompany');
-      redisSubscriber.subscribe('updateCompany');
-      redisSubscriber.subscribe('deleteCompany');
-    }
     res.locals.graphQLResponse = response.data;
     // store to redis
     // sets the query as the key, with a 10 minutes expiration value from the first query.
@@ -171,6 +128,7 @@ const getQuery = (req: Request, res: Response, next: NextFunction) => {
     next();
   });
 };
+
 
 let isQuellable: boolean;
 const parseAST = (AST: any)=> {
@@ -207,7 +165,6 @@ const parseAST = (AST: any)=> {
     OperationDefinition(node) {
       operationType = node.operation;
       if (node.operation === 'subscription') {
-        console.log("subscription");
         operationType = 'unQuellable';
         return BREAK;
       }
@@ -274,16 +231,17 @@ const parseAST = (AST: any)=> {
 }
 
 
+
+
+
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
   // console.log('req.params.query is ', req.params.query);
-  const AST = parse(req.params.query);
+  const AST: any = parse(req.params.query);
   const result: any = parseAST(AST);
-  
-  console.log("Name type!!!!!!!!!!!!!",result);
+  // console.log("AST", AST.definitions[0].selectionSet.selections[0].selectionSet)
+    console.log("AST", AST.definitions[0].selectionSet.selections[0].selectionSet.selections[3].selectionSet.selections)
 
-  // console.log(parse(req.params.query))
-  
-  // console.log(parseValue(req.params.query))
+  // console.log("Name type!!!!!!!!!!!!!",result.proto);
 
   redisClient.get(`${req.params.query}`, (error, values) => {
     if (error) {
