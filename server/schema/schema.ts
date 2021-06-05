@@ -4,6 +4,7 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLInt,
+  GraphQLID,
   GraphQLNonNull,
   GraphQLInputObjectType,
 } from 'graphql';
@@ -81,7 +82,8 @@ const RootQueryType = new GraphQLObjectType({
     companies: {
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
-      resolve: async () => {
+      resolve: async (parent, args, context, info) => {
+        // console.log(info);
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },
@@ -182,7 +184,6 @@ const mutation: any = new GraphQLObjectType({
         return result.rows[0];
       },
     },
-
     updateUser: {
       type: UserType,
       args: {
