@@ -98,10 +98,9 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   graphql(schema, res.locals.querymade).then((response) => {
     res.locals.graphQLResponse = response.data;
     console.log('graphQL responded with', response.data);
-    // a query was made to graphQL
-    // need subscription algo to get rid of hard coding.
-    const subscriptions = ['Users', 'Companies'];
     if (!res.locals.ismutation) {
+      const subscriptions = findAllTypes(response.data);
+      console.log('subscribed to ', subscriptions);
       // subscribe the query to mutations of type Subscription
       for (let key in subscriptions) {
         redisClient.get(`${subscriptions[key]}`, (error, values) => {
@@ -134,6 +133,24 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+const findAllTypes = (GQLresponse: any, subs: any = []) => {
+  for (let key in GQLresponse) {
+    if (Array.isArray(GQLresponse[key])) GQLresponse = { ...GQLresponse };
+    if (key == '__typename') {
+      subs.push(GQLresponse[key]);
+    }
+    const type = '__typename';
+    if (Array.isArray(GQLresponse[key])) {
+      GQLresponse = { ...GQLresponse[key][0] };
+
+      if (GQLresponse.hasOwnProperty(type)) subs.push(GQLresponse[type]);
+      subs.concat(findAllTypes(GQLresponse, subs));
+    }
+  }
+  subs = [...new Set(subs)];
+  return subs;
+};
+
 const updateRedisAfterMutation = (graphQLResponse: Object) => {
   // get the type of mutation from the first key in GQLresponse
   const mutation = Object.keys(graphQLResponse)[0];
@@ -147,26 +164,27 @@ const updateRedisAfterMutation = (graphQLResponse: Object) => {
       console.log('redis error', error);
     }
     const queriesToClear = JSON.parse(`${values}`);
-    // itterate over the array of cached queries that were subscribed
-    // to this mutation and delete them from redis
-    for (let i = 0; i < queriesToClear.length; i++) {
-      redisClient.del(queriesToClear[i], (err, res) => {
-        // delete these later
-        if (res === 1) {
-          console.log('Deleted successfully');
-        } else {
-          console.log('Item to be cleared was not found in redis');
-        }
-      });
+    if (queriesToClear) {
+      // if queries to clear exists, iterate over queries and delete them from redis.
+      for (let i = 0; i < queriesToClear.length; i++) {
+        redisClient.del(queriesToClear[i], (err, res) => {
+          // delete these later
+          if (res === 1) {
+            console.log('Deleted successfully');
+          } else {
+            console.log('Item to be cleared was not found in redis');
+          }
+        });
+      }
     }
-  });
-  // After array is cleared, delete the subscribed key.
-  redisClient.del(`${keyToClear}`, (err, res) => {
-    if (res === 1) {
-      console.log('deleted successfully');
-    } else {
-      console.log('Cannot delete');
-    }
+    // After array is cleared, delete the subscribed key.
+    redisClient.del(`${keyToClear}`, (err, res) => {
+      if (res === 1) {
+        console.log('Deleted the Subscriber Key successfully');
+      } else {
+        console.log('Failed to delete the Subscriber Key');
+      }
+    });
   });
 };
 
