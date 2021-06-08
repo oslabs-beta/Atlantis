@@ -82,7 +82,7 @@ const RootQueryType = new GraphQLObjectType({
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
       resolve: async (obj, args, context, info) => {
-        console.log('this is the info',context);
+        // console.log('this is the info',context);
         // console.log('this is the context.rows',context);
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;

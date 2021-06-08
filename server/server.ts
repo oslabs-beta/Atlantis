@@ -27,10 +27,11 @@ const PORT = process.env.PORT || 3000;
 
 //we might need to configure this line somehow for users running behind a proxy
 // app.set('trust proxy', 1)
-const redisClient = redis.createClient({
+const redisServer = redis.createClient({
   host: 'localhost',
   port: 6379,
 });
+
 const RedisStore = connectRedis(session);
 
 //_________________________________REDIS SUBSCRIBER_________________________________//
@@ -43,7 +44,7 @@ redisSubscriber.on('message', (event, data) => {
   try {
     console.log('Received changed data :' + data);
     // find this query in the redis client,
-    redisClient.del(event, (err, res) => {
+    redisServer.del(event, (err, res) => {
       const result = res === 1 ? 'Deleted Successfully' : 'not deleted';
       console.log(result);
     });
@@ -102,7 +103,7 @@ const getQuery = (req: Request, res: Response, next: NextFunction) => {
     res.locals.graphQLResponse = response.data;
     // store to redis
     // sets the query as the key, with a 10 minutes expiration value from the first query.
-    redisClient.setex(
+    redisServer.setex(
       req.params.query,
       600,
       JSON.stringify(res.locals.graphQLResponse)
@@ -111,7 +112,7 @@ const getQuery = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
-app.get('/testing', getQuery, (req, res, next) => {
+app.get('/testing', getQuery, (req: Request, res: Response, next: NextFunction) => {
   console.log('this is going to be saved as redis key', res.locals.query);
   console.log(
     'this is going to be saved as redis value',
@@ -123,7 +124,7 @@ app.get('/testing', getQuery, (req, res, next) => {
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
   console.log('req.params.query is ', req.params.query);
 
-  redisClient.get(`${req.params.query}`, (error, values) => {
+  redisServer.get(`${req.params.query}`, (error, values) => {
     if (error) {
       console.log('redis error', error);
       res.send(error);
@@ -145,7 +146,7 @@ app.get(
   '/cachetest/:query',
   checkRedis,
   getQuery,
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     res.send(res.locals.graphQLResponse);
   }
 );
@@ -157,3 +158,6 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`);
 });
+
+
+//module.exports = {redisServer};
