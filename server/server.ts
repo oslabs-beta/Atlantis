@@ -10,7 +10,7 @@ import session from 'express-session';
 const db = require('./model');
 import { graphqlHTTP } from 'express-graphql';
 import { hasUncaughtExceptionCaptureCallback, nextTick } from 'process';
-import { graphql, visit ,parse, BREAK} from 'graphql';
+import { graphql, visit, parse, BREAK } from 'graphql';
 import { exists } from 'fs';
 import { stringify } from 'querystring';
 import { SSL_OP_CIPHER_SERVER_PREFERENCE } from 'constants';
@@ -23,7 +23,7 @@ const app: Application = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
-const getMutationMap = (schema: any)=> {
+const getMutationMap = (schema: any) => {
   const mutationMap: any = {};
   // get object containing all root mutations defined in the schema
   const mutationTypeFields = schema._mutationType._fields;
@@ -42,27 +42,26 @@ const getMutationMap = (schema: any)=> {
       returnedType.push(mutationsObj[mutation].type.ofType.name);
     }
     if (mutationsObj[mutation].type.name) {
-   
       returnedType = mutationsObj[mutation].type.name;
-    
     }
     mutationMap[mutation] = returnedType;
   }
-
   return mutationMap;
+<<<<<<< HEAD
 }
 console.log('erikmut map', getMutationMap(schema))
+=======
+};
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
 
-const getQueryMap = (schema: any)=> {
+const getQueryMap = (schema: any) => {
   const queryMap: any = {};
   // get object containing all root queries defined in the schema
   const queryTypeFields = schema._queryType._fields;
 
   // if queryTypeFields is a function, invoke it to get object with queries
   const queriesObj =
-    typeof queryTypeFields === 'function'
-      ? queryTypeFields()
-      : queryTypeFields;
+    typeof queryTypeFields === 'function' ? queryTypeFields() : queryTypeFields;
   for (const query in queriesObj) {
     // get name of GraphQL type returned by query
     // if ofType --> this is collection, else not collection
@@ -78,10 +77,7 @@ const getQueryMap = (schema: any)=> {
   }
 
   return queryMap;
-}
-// console.log("GET QUERY MAP", getQueryMap(schema));
-
-// console.log("SChema",schema);
+};
 
 const PORT = process.env.PORT || 3000;
 
@@ -101,6 +97,7 @@ app.use(
   })
 );
 
+<<<<<<< HEAD
 const getQuery = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
   // query={{companies}name}
@@ -141,13 +138,107 @@ const getQuery = (req: Request, res: Response, next: NextFunction) => {
       600,
       JSON.stringify(res.locals.graphQLResponse)
     );
+=======
+const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
+  if (res.locals.graphQLResponse) return next();
+  console.log('about to make GQL query of ', res.locals.querymade);
+  graphql(schema, res.locals.querymade).then((response) => {
+    res.locals.graphQLResponse = response.data;
+    console.log('graphQL responded with', response.data);
+    if (!res.locals.ismutation) {
+      const subscriptions = findAllTypes(response.data);
+      console.log('subscribed to ', subscriptions);
+      // subscribe the query to mutations of type Subscription
+      for (let key in subscriptions) {
+        redisClient.get(`${subscriptions[key]}`, (error, values) => {
+          if (error) {
+            console.log('redis error', error);
+            res.send(error);
+          }
+          // Case where this query is the first to subscribe to this type.
+          if (!values) {
+            const subs = [res.locals.querymade];
+            redisClient.set(subscriptions[key], JSON.stringify(subs));
+          } else {
+            // Case where other queries are also subscribed to changes of this type.
+            const subs = JSON.parse(`${values}`);
+            subs.push(res.locals.querymade);
+            redisClient.set(subscriptions[key], JSON.stringify(subs));
+          }
+        });
+      }
+      redisClient.setex(
+        res.locals.querymade,
+        600,
+        JSON.stringify(res.locals.graphQLResponse)
+      );
+    } else {
+      // mutation was made, need to clear all subscribers.
+      updateRedisAfterMutation(res.locals.graphQLResponse);
+    }
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
     next();
   });
 };
 
+const findAllTypes = (GQLresponse: any, subs: any = []) => {
+  for (let key in GQLresponse) {
+    if (Array.isArray(GQLresponse[key])) GQLresponse = { ...GQLresponse };
+    if (key == '__typename') {
+      subs.push(GQLresponse[key]);
+    }
+    const type = '__typename';
+    if (Array.isArray(GQLresponse[key])) {
+      GQLresponse = { ...GQLresponse[key][0] };
 
+      if (GQLresponse.hasOwnProperty(type)) subs.push(GQLresponse[type]);
+      subs.concat(findAllTypes(GQLresponse, subs));
+    }
+  }
+  subs = [...new Set(subs)];
+  return subs;
+};
+
+const updateRedisAfterMutation = (graphQLResponse: Object) => {
+  // get the type of mutation from the first key in GQLresponse
+  const mutation = Object.keys(graphQLResponse)[0];
+  // get subscribed tables to the mutation from the mutation map
+  const subscribedTable = getMutationMap(schema);
+  // mutationquery = addUser
+  const keyToClear = subscribedTable[mutation];
+  // query redis for key to clear
+  redisClient.get(`${keyToClear}`, (error, values) => {
+    if (error) {
+      console.log('redis error', error);
+    }
+    const queriesToClear = JSON.parse(`${values}`);
+    if (queriesToClear) {
+      // if queries to clear exists, iterate over queries and delete them from redis.
+      for (let i = 0; i < queriesToClear.length; i++) {
+        redisClient.del(queriesToClear[i], (err, res) => {
+          // delete these later
+          if (res === 1) {
+            console.log('Deleted successfully');
+          } else {
+            console.log('Item to be cleared was not found in redis');
+          }
+        });
+      }
+    }
+    // After array is cleared, delete the subscribed key.
+    redisClient.del(`${keyToClear}`, (err, res) => {
+      if (res === 1) {
+        console.log('Deleted the Subscriber Key successfully');
+      } else {
+        console.log('Failed to delete the Subscriber Key');
+      }
+    });
+  });
+};
+
+//quellCode for parseAst
 let isQuellable: boolean;
-const parseAST = (AST: any)=> {
+const parseAST = (AST: any) => {
   // initialize prototype as empty object
   const proto = {};
   //let isQuellable = true;
@@ -158,7 +249,7 @@ const parseAST = (AST: any)=> {
   let protoArgs: any = null; //{ country: { id: '2' } }
 
   // initialize stack to keep track of depth first parsing
-  const stack: (any)[] = [];
+  const stack: any[] = [];
 
   /**
    * visit is a utility provided in the graphql-JS library. It performs a
@@ -193,13 +284,13 @@ const parseAST = (AST: any)=> {
         }
         if (node.arguments && node.arguments.length > 0) {
           protoArgs = protoArgs || {};
-          protoArgs[node.name.value]= {};
+          protoArgs[node.name.value] = {};
 
           // collect arguments if arguments contain id, otherwise make query unquellable
           // hint: can check for graphQl type ID instead of string 'id'
           for (let i = 0; i < node.arguments.length; i++) {
             const key: any = node.arguments[i].name.value;
-            const value:any = node.arguments[i].value.value;
+            const value: any = node.arguments[i].value.value;
 
             // for queries cache can handle only id as argument
             if (operationType === 'query') {
@@ -220,7 +311,6 @@ const parseAST = (AST: any)=> {
       },
     },
     SelectionSet(node: any, key, parent: any, path, ancestors) {
-
       /* Exclude SelectionSet nodes whose parents' are not of the kind
        * 'Field' to exclude nodes that do not contain information about
        *  queried fields.
@@ -240,6 +330,7 @@ const parseAST = (AST: any)=> {
             ? (prev[curr] = tempObject) // set value
             : (prev[curr] = prev[curr]); // otherwise, if index exists, keep value
         }, proto);
+<<<<<<< HEAD
         protoObj["__typename"] = true;
         // console.log("ProtoObj,,,,,," ,protoObj);
 
@@ -252,19 +343,43 @@ const parseAST = (AST: any)=> {
 
 }
 
+=======
+        protoObj['__typename'] = true;
+        // console.log("ProtoObj,,,,,," ,protoObj);
+      }
+    },
+  });
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
 
+  return { proto, protoArgs, operationType };
+};
 
+<<<<<<< HEAD
 const ProtoQueryString = (obj:any, protoArgs:any) => {
   const argsToQuery = (protoArgs:any) => {
     let string = '';
     // fuck typescript  
     for (let key in protoArgs) {
       for (let innerKey in protoArgs[key]) {
+=======
+// parse's the proto to a gql query string
+const ProtoQueryString = (obj: any, protoArgs: any) => {
+  const argsToQuery = (protoArgs: any) => {
+    let string = '';
+    for (let key in protoArgs) {
+      for (let innerKey in protoArgs[key]) {
+        // accounts for edge case where an Int is passed in as an arguement.
+        if (!isNaN(protoArgs[key][innerKey])) {
+          string += innerKey + ': ' + protoArgs[key][innerKey] + ' ';
+          break;
+        }
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
         string += innerKey + ': ' + '"' + protoArgs[key][innerKey] + '"' + ' ';
       }
     }
     return '(' + string + ')';
   };
+<<<<<<< HEAD
 
   let mainString = '';
   for (let key in obj) {
@@ -281,9 +396,30 @@ const ProtoQueryString = (obj:any, protoArgs:any) => {
   }
   return '{' + mainString + '}';
 };
+=======
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
 
+  let mainString = '';
+  for (let key in obj) {
+    if (typeof obj[key] !== 'object') {
+      mainString += ' ' + key + ' ';
+    } else {
+      mainString += ' ' + key + ' ';
+      if (protoArgs) {
+        if (typeof protoArgs[key] == 'object') {
+          const inner = argsToQuery(protoArgs);
+          mainString += inner;
+        }
+      }
+      mainString += ProtoQueryString(obj[key], {});
+    }
+  }
+  return '{' + mainString + '}';
+};
 
+// if query, checks redis for the query.
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
+<<<<<<< HEAD
 
 
   // console.log('req.params.query is ', req.params.query);
@@ -313,24 +449,33 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
 
   
   redisClient.get(querymade, (error, values) => {
+=======
+  if (res.locals.ismutation) return next();
+  redisClient.get(res.locals.querymade, (error, values) => {
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
     if (error) {
       console.log('redis error', error);
       res.send(error);
     }
     if (!values) {
       console.log('query was not a key in redis session');
+<<<<<<< HEAD
       res.locals.querymade = querymade;
+=======
+
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
       return next();
     } else {
       console.log('query was found in cache');
       const redisValues = JSON.parse(`${values}`);
       // console.log('redis Values are', redisValues);
       res.locals.graphQLResponse = redisValues;
-      next();
+      return next();
     }
   });
 };
 
+<<<<<<< HEAD
 
 const checkMutation = (req: Request, res: Response, next: NextFunction) => { 
 
@@ -344,10 +489,30 @@ const checkMutation = (req: Request, res: Response, next: NextFunction) => {
 
 
 // cachetest?{users{name}}
+=======
+const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
+  const AST: any = parse(req.params.query);
+  const { proto, protoArgs, operationType }: any = parseAST(AST);
+  console.log(proto);
+  console.log(protoArgs, 'protoargs is');
+
+  let querymade = ProtoQueryString(proto, protoArgs);
+  console.log('after PQS');
+  if (operationType == 'mutation') {
+    querymade = 'mutation' + querymade;
+    res.locals.ismutation = true;
+  }
+  console.log('proto to query', querymade);
+  res.locals.querymade = querymade;
+  next();
+};
+
+>>>>>>> 0a38c5706b43fc1a657dd9c3a774485a0d9e7db7
 app.get(
   '/cachetest/:query',
+  parsingAlgo,
   checkRedis,
-  getQuery,
+  makeGQLrequest,
   (req, res, next) => {
     res.send(res.locals.graphQLResponse);
   }
