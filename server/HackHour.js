@@ -584,9 +584,9 @@ const filterData = (cachedData, query) => {
 };
 
 const nested_data = {
-  companies: ["company_id", "name"],
+  companies: ["company_id", "name", {"employees": ["user_id", {"project": ["project_name", "project_id"]}]}],
 };
-
+["company_d"]["employee"]
 console.log(filterData(data, nested_data));
 
 //{ employees: ["name", "user_id"] }
