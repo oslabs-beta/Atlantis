@@ -535,6 +535,14 @@ const SpaceX1 = {
   ],
 };
 
+const project =  {
+  "project": {
+    "project_id": 1,
+    "project_name": "iPhone",
+    "company_id": 2,
+    "project_description": null
+  }
+}
 const filterArray = (arr, query) => {
   const result = [];
   arr.forEach((e) => {
@@ -583,22 +591,15 @@ const filterData = (cachedData, query) => {
   return result;
 };
 
-const nested_data = {
-  companies: ["company_id", "name", {"employees": ["user_id", {"project": ["project_name", "project_id"]}]}],
+const key_data = {
+  companies: ["company_id", "name", {"employees": ["user_id"]}],
 };
-["company_d"]["employee"]
-console.log(filterData(data, nested_data));
 
-//{ employees: ["name", "user_id"] }
-//{"employees": ["name", "user_id"]}
-// const nested_data1 = {
-//  users: [ "user_id", "name" ]
+// const project_key = {
+//   project: 
 // }
-// const spaceX_query = {
-//   launchesPast: [
-//     "mission_name",
-//     "launch_date_local",
-//     // {launch_site :["site_name_long"]},
-//     { links: ["article_link", "video_link"] },
-//   ],
-// };
+
+
+
+console.log(filterData(data, key_data));
+

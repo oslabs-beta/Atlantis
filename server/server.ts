@@ -72,7 +72,7 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   // console.log("about to make GQL query of ", res.locals.querymade);
   graphql(schema, res.locals.querymade).then((response) => {
     res.locals.graphQLResponse = response.data;
-    // console.log("graphQL responded with", response.data);
+    // console.log("graphQL responded with.............", response);
     if (!res.locals.ismutation) {
       const subscriptions = findAllTypes(response.data);
       // console.log("subscribed to ", subscriptions);
@@ -364,7 +364,7 @@ const duplicatedASTed = (AST: any) => {
           // for (let field of node.selections) {             //if this is not a parent
           //  tempArray.push(field.name.value);
           //   };
-            console.log(tempArray, ' line 385');
+            // console.log(tempArray, ' line 385');
           tempObj[parentName] = tempArray;
           if(!protoDup){
             protoDup = tempObj;
@@ -388,9 +388,7 @@ const duplicatedASTed = (AST: any) => {
             })
             layer = parentName;
           }
-          console.log("PROTO DUP", protoDup);
 
-        console.log("stack inside selectionset", stack);
 
       }
     },
@@ -447,7 +445,7 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
       return next();
     } else {
       // console.log("query was found in cache");
-      console.log("redisValues", values);
+      // console.log("redisValues", values);
       const redisValues = JSON.parse(`${values}`);
       // console.log('redis Values are', redisValues);
       res.locals.graphQLResponse = redisValues;
@@ -458,12 +456,12 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
 
 const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   const AST: any = parse(req.params.query);
-  console.log("AST", AST);
+
+  console.log("REQ PARAMS", req.params.query)
   const { proto, protoArgs, operationType }: any = parseAST(AST);
-  console.log("Quell Proto", proto);
+  console.log("Quell Proto............", proto);
 
   const duplicatedASTdata: any = duplicatedASTed(AST).protoDup;
-  console.log("duplicated proto", duplicatedASTdata);
 
   let querymade = ProtoQueryString(proto, protoArgs);
   // console.log("after PQS");
@@ -493,3 +491,12 @@ app.get("/", (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`);
 });
+
+
+
+
+// mutation{
+//   updateCompany(company_id: 2, name: "Googles", description:"SE"){
+//     name
+//   }
+// }
