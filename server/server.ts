@@ -110,11 +110,24 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
         });
       }
       //change queryMade back top level field name
+
+
+      if(res.locals.fieldArg){
+        console.log("from redis w/o id field arg", res.locals.fieldArg)
+        console.log("from redis w/o id", res.locals.redisKey)
       redisClient.setex(
         res.locals.redisKey,
         600,
         JSON.stringify(res.locals.graphQLResponse)
       );
+      } else {
+        console.log("from redis id", res.locals.redisKeyID)
+        redisClient.setex(
+          res.locals.redisKeyID,
+          600,
+          JSON.stringify(res.locals.graphQLResponse)
+        );
+      }
     } else {
       // mutation was made, need to clear all subscribers.
       updateRedisAfterMutation(res.locals.graphQLResponse);
@@ -191,7 +204,7 @@ const parseAST = (AST: any) => {
 
   let operationType: string;
 
-  let parentFieldArgs: string;
+ //let parentPlusKey: string
 
   let fieldArgs: string
 
@@ -515,8 +528,11 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   // console.log("proto to query", querymade);
   res.locals.querymade = querymade;
   res.locals.redisKey = parentFieldName;
+  
   res.locals.fieldArray = fieldArray;
   res.locals.restructuredQuery = duplicatedASTdata; 
+  let parentPlusKey:string = parentFieldName + fieldArgs
+  res.locals.redisKeyID = parentPlusKey
   next();
 };
 
