@@ -4,13 +4,9 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLInt,
-  GraphQLID,
-  GraphQLNonNull,
-  GraphQLInputObjectType,
 } from 'graphql';
 const db = require('../model');
-import fetch from 'node-fetch';
-import { Args } from 'type-graphql';
+
 
 const UserType: any = new GraphQLObjectType({
   name: 'Users',
@@ -82,7 +78,20 @@ const RootQueryType = new GraphQLObjectType({
     companies: {
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
+      args: {
+        company_id: { type: GraphQLInt },
+      },
       resolve: async (parent, args, context, info) => {
+        console.log("ARGS",args);
+        if(Object.keys(args).length !== 0){
+          const result = await db.query(
+            `SELECT * FROM company WHERE company_id = $1`,
+            [args.company_id]
+          );
+          console.log("RESULT", result.rows);
+          return result.rows;
+
+        }
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },

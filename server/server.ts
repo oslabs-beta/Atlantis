@@ -77,31 +77,64 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
     res.locals.graphQLResponse = response.data;
     // console.log("graphQL responded with.............", response);
     if (!res.locals.ismutation) {
-      // const subscriptions = findAllTypes(response.data);
-      // console.log("subscribed to ", subscriptions);
-      // subscribe the query to mutations of type Subscription
 
+      //FullQuery is sub to type_names
+      //if companies->               Companies =[Query, ]          Users= [Query]
+      
+      //REDIS
+      //companies : "alll comapnies in here "
+      //companies:fields : "{proto} "
+      //company1 : "alll comapnies in here "
+      //company1:fields :"{proto}"
+      //company1:S: [company1,company1:fields , companies]
+
+     //get request------>   company1 ->    company1     companies,     company1fields
+      //                                    ^^              ^^            ^^
+      //subscribers----->           fieldName + Args    __typename    fieldName + Args + :fields
+      // company1 -> Company1:S = [company1, company1:field, company];
+      //           -> User1:S = []
+
+      //mutation---> company1
+
+      //subsribe to a publisher when a new request is made
+        //subscribe to 
+      //       
+      //                      talbe -> (Companies)
+
+
+      //  companies  
+      
+      const subscriptions = foundTypes(res.locals.graphQLResponse);
+      console.log("subscribed to ", subscriptions);
+      // subscribe the query to mutations of type Subscription
       ///////////////////// OLD PUB SUB //////////////////////////////
-      // for (let key in subscriptions) {
-      //   redisClient.get(`${subscriptions[key]}`, (error, values) => {
-      //     if (error) {
-      //       console.log("redis error", error);
-      //       res.send(error);
-      //     }
+      for (let key in subscriptions) {
+        //Companies:
+        
+        redisClient.get(`${subscriptions[key]}`, (error, values) => {
+          if (error) {
+            console.log("redis error", error);
+            res.send(error);
+          }
       //     // Case where this query is the first to subscribe to this type.
-      //     if (!values) {
-      //       const subs = [res.locals.querymade];
-      //       // console.log("KEYY?",subscriptions[key]);
-      //       // console
-      //       redisClient.set(subscriptions[key], JSON.stringify(subs));
-      //     } else {
-      //       // Case where other queries are also subscribed to changes of this type.
-      //       const subs = JSON.parse(`${values}`);
-      //       subs.push(res.locals.querymade);
-      //       redisClient.set(subscriptions[key], JSON.stringify(subs));
-      //     }
-      //   });
-      // }
+          if (!values) {
+            
+              const subs = [res.locals.redisKey, `${res.locals.redisKey}:fields`];
+              // console.log("KEYY?",subscriptions[key]);
+              // console
+              redisClient.set(`${subscriptions[key]}:Publisher`, JSON.stringify(subs));
+          } else {
+            // Case where other queries are also subscribed to changes of this type.
+            
+            console.log("hit append statement in pub/sub")
+            const subs = JSON.parse(`${values}`);
+            subs.push(res.locals.redisKey);
+            subs.push(`${res.locals.redisKey}:fields`);
+            redisClient.set(subscriptions[key], JSON.stringify(subs));
+          };
+        
+        });
+      }
       ///////////////////// OLD PUB SUB //////////////////////////////
 
 
@@ -124,35 +157,50 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
- 
+//const stringy = JSON.stringify(data)
+function foundTypes(input:any) {
+    const stringy = JSON.stringify(input)
+    let regex = /(__typename)\":\"(.+?)\"/g;
+    let found = new Set(stringy.match(regex))
 
-
-
-const findAllTypes = (GQLresponse: any, subs: any = []) => {
-  for (let key in GQLresponse) {
-    if (Array.isArray(GQLresponse[key])) GQLresponse = { ...GQLresponse };
-    if (key == "__typename") {
-      subs.push(GQLresponse[key]);
+    const subArr = []
+    for(let item of found){
+      let newItem = item.slice(13, -1);
+      subArr.push(newItem);
     }
-    const type = "__typename";
-    if (Array.isArray(GQLresponse[key])) {
-      GQLresponse = { ...GQLresponse[key][0] };
+    return subArr;
+}
 
-      if (GQLresponse.hasOwnProperty(type)) subs.push(GQLresponse[type]);
-      subs.concat(findAllTypes(GQLresponse, subs));
-    }
-  }
-  subs = [...new Set(subs)];
-  return subs;
-};
+
+// const findAllTypes = (GQLresponse: any, subs: any = []) => {
+
+
+//   for (let key in GQLresponse) {
+//     if (Array.isArray(GQLresponse[key])) GQLresponse = { ...GQLresponse };
+//     if (key == "__typename") {
+//       subs.push(GQLresponse[key]);
+//     }
+//     const type = "__typename";
+//     if (Array.isArray(GQLresponse[key])) {
+//       GQLresponse = { ...GQLresponse[key][0] };
+//       if (GQLresponse.hasOwnProperty(type)) subs.push(GQLresponse[type]);
+
+//       subs.concat(findAllTypes(GQLresponse, subs));
+//     }
+//   }
+//   subs = [...new Set(subs)];
+//   return subs;
+// };
 
 const updateRedisAfterMutation = (graphQLResponse: Object) => {
   // get the type of mutation from the first key in GQLresponse
   const mutation = Object.keys(graphQLResponse)[0];
   // get subscribed tables to the mutation from the mutation map
   const subscribedTable = getMutationMap(schema);
+
   // mutationquery = addUser
-  const keyToClear = subscribedTable[mutation];
+  const keyToClear = `${subscribedTable[mutation]}:Publisher`;
+  console.log(keyToClear);
   // query redis for key to clear
   redisClient.get(`${keyToClear}`, (error, values) => {
     if (error) {
@@ -517,13 +565,13 @@ const checkRedis = async (req: Request, res: Response, next: NextFunction) => {
 const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   const AST: any = parse(req.params.query);
 
-  console.log("REQ PARAMS", req.params.query)
+  // console.log("REQ PARAMS", req.params.query)
   const { proto, protoArgs, operationType,parentFieldName ,fieldArray, fieldArgs, argsName}: any = parseAST(AST);
   // console.log("Quell Proto............", proto);
   // console.log("ProtoArgs", protoArgs);
   // console.log("PARENT NODE Name", parentFieldName);
   // console.log("parentFieldArgs", parentFieldArgs)
-  console.log("Field Array", fieldArray);
+  // console.log("Field Array", fieldArray);
   // console.log("FIELD ID", fieldArgs);
   // console.log("argsName", argsName);
 
@@ -540,7 +588,9 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   }
   // console.log("proto to query", querymade);
   res.locals.proto = proto;
+  console.log("PROTO",res.locals.proto)
   res.locals.querymade = querymade;
+  res.locals.fieldArgs = fieldArgs;
   res.locals.redisKey = (fieldArgs) ? parentFieldName + fieldArgs : parentFieldName;
   res.locals.fieldArray = fieldArray;
   res.locals.restructuredQuery = duplicatedASTdata; 
