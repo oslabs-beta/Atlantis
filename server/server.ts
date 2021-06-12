@@ -267,7 +267,7 @@ const parseAST = (AST: any) => {
     },
     SelectionSet(node: any, key, parent: any, path, ancestors) {
       /* Exclude SelectionSet nodes whose parents' are not of the kind
-       * 'Field' to exclude nodes that do not contain information about
+       * 'Field' to exclude nodes that do not contain crmation about
        *  queried fields.
        */
       if (parent.kind === "Field") {
