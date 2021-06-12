@@ -458,9 +458,10 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
 
 const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   const AST: any = parse(req.params.query);
-  console.log("AST", AST);
+  console.log("REQ PARAMS", req.params.query)
+  console.log("AST.............", AST);
   const { proto, protoArgs, operationType }: any = parseAST(AST);
-  console.log("Quell Proto", proto);
+  console.log("Quell Proto..................", proto,);
 
   const duplicatedASTdata: any = duplicatedASTed(AST).protoDup;
   console.log("duplicated proto", duplicatedASTdata);
@@ -493,3 +494,4 @@ app.get("/", (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`);
 });
+//module.exports={proto: any}
