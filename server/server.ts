@@ -15,16 +15,7 @@ const schema = require("./schema/schema");
 // import {DuplicateFilter} from "./DuplicatedFilter.js";
 
 const {DuplicateFilter} = require("./DuplicatedFilter.js");
-const data: any = {
-  "project": {
-    "project_id": 1,
-    "project_name": "iPhone",
-    "company_id": 2,
-  }
-}
-const dataQuery: any = {
-  "project": ["project_id", "company_id"]
-}
+
 
 // console.log(DuplicateFilter(data, dataQuery));
 dotenv.config();
@@ -114,6 +105,11 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
         res.locals.redisKey,
         600,
         JSON.stringify(res.locals.graphQLResponse)
+      );
+      redisClient.setex(
+        `${res.locals.redisKey}:fields`,
+        600,
+        JSON.stringify(res.locals.proto)
       );
     } else {
       // mutation was made, need to clear all subscribers.
@@ -290,9 +286,7 @@ const parseAST = (AST: any) => {
             : (prev[curr] = prev[curr]); // otherwise, if index exists, keep value
         }, proto);
         protoObj["__typename"] = true;
-        // console.log("PROTO OBJ..........", protoObj);
       }else{
-        console.log("PARENT FIELD?", node.selections[0].name.value);
         
         parentFieldName = node.selections[0].name.value;
         
@@ -465,11 +459,26 @@ const ProtoQueryString = (obj: any, protoArgs: any) => {
   return "{" + mainString + "}";
 };
 
+
+
 // if query, checks redis for the query.
-const checkRedis = (req: Request, res: Response, next: NextFunction) => {
+
+const isSubset = (superObj: any, subObj: any):boolean => {
+  return Object.keys(subObj).every(ele => {
+      if (typeof subObj[ele] == 'object') {
+          return isSubset(superObj[ele], subObj[ele]);
+      }
+      if(!subObj || !superObj) return false;
+      return subObj[ele] === superObj[ele]
+  });
+};
+
+
+
+const checkRedis = async (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.ismutation) return next();
   //rqplace res.locals.querymade with redisKey
-  redisClient.get(res.locals.redisKey, (error, values) => {
+  redisClient.get(`${res.locals.redisKey}:fields`, (error, values) => {
     if (error) {
       console.log("redis error", error);
       res.send(error);
@@ -479,9 +488,20 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
       return next();
     } else {
       const redisValues = JSON.parse(`${values}`);
-      //get the specific field from redis Values based on you know
-      res.locals.graphQLResponse = DuplicateFilter(redisValues, res.locals.restructuredQuery);
+      //check if fields exist in ^ redisValues 
+      const checkIsSubset = isSubset(redisValues, res.locals.proto);
+      console.log(checkIsSubset);
+      if(!checkIsSubset){
+        console.log("not all fields are found on cache");
       return next();
+      }
+      //get the specific field from redis Values based on you know
+      redisClient.get(res.locals.redisKey, (err, values)=>{
+        const redisValues = JSON.parse(`${values}`);
+        console.log("fetch data from sub query")
+        res.locals.graphQLResponse = DuplicateFilter(redisValues, res.locals.restructuredQuery);
+        return next();
+      })
     }
   });
 };
@@ -493,11 +513,11 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
 
   console.log("REQ PARAMS", req.params.query)
   const { proto, protoArgs, operationType,parentFieldName ,fieldArray, fieldArgs, argsName}: any = parseAST(AST);
-  console.log("Quell Proto............", proto);
+  // console.log("Quell Proto............", proto);
   // console.log("ProtoArgs", protoArgs);
   // console.log("PARENT NODE Name", parentFieldName);
   // console.log("parentFieldArgs", parentFieldArgs)
-  console.log("FIELDARRay", fieldArray);
+  console.log("Field Array", fieldArray);
   // console.log("FIELD ID", fieldArgs);
   // console.log("argsName", argsName);
 
@@ -513,6 +533,7 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
     res.locals.ismutation = true;
   }
   // console.log("proto to query", querymade);
+  res.locals.proto = proto;
   res.locals.querymade = querymade;
   res.locals.redisKey = parentFieldName;
   res.locals.fieldArray = fieldArray;
