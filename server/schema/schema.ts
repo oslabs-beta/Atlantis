@@ -71,7 +71,6 @@ const RootQueryType = new GraphQLObjectType({
         company_id: { type: GraphQLInt },
       },
       resolve: async (parent, args) => {
-        console.log(args)
         const result = await db.query(
           `SELECT * FROM company WHERE company_id = $1`,
           [args.company_id]
@@ -84,7 +83,6 @@ const RootQueryType = new GraphQLObjectType({
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
       resolve: async (parent, args, context, info) => {
-        console.log("INFO",info);
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },
@@ -157,7 +155,6 @@ const mutation: any = new GraphQLObjectType({
         description: { type: GraphQLString },
       },
       resolve: async (parent, { name, description }) => {
-        console.log('parent is ', parent);
         const result = await db.query(
           'INSERT INTO public.company (name, description) VALUES ( $1, $2) RETURNING *',
           [name, description]

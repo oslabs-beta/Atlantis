@@ -72,52 +72,59 @@ app.use(
 //console.log("line71", )
 const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
-  // console.log("about to make GQL query of ", res.locals.querymade);
+  console.log("about to make GQL query of ", res.locals.querymade);
   graphql(schema, res.locals.querymade).then((response) => {
     res.locals.graphQLResponse = response.data;
     // console.log("graphQL responded with.............", response);
     if (!res.locals.ismutation) {
-      const subscriptions = findAllTypes(response.data);
+      // const subscriptions = findAllTypes(response.data);
       // console.log("subscribed to ", subscriptions);
       // subscribe the query to mutations of type Subscription
-      for (let key in subscriptions) {
-        redisClient.get(`${subscriptions[key]}`, (error, values) => {
-          if (error) {
-            console.log("redis error", error);
-            res.send(error);
-          }
-          // Case where this query is the first to subscribe to this type.
-          if (!values) {
-            const subs = [res.locals.querymade];
-            // console.log("KEYY?",subscriptions[key]);
-            // console
-            redisClient.set(subscriptions[key], JSON.stringify(subs));
-          } else {
-            // Case where other queries are also subscribed to changes of this type.
-            const subs = JSON.parse(`${values}`);
-            subs.push(res.locals.querymade);
-            redisClient.set(subscriptions[key], JSON.stringify(subs));
-          }
-        });
-      }
-      //change queryMade back top level field name
-      redisClient.setex(
-        res.locals.redisKey,
-        600,
-        JSON.stringify(res.locals.graphQLResponse)
-      );
-      redisClient.setex(
-        `${res.locals.redisKey}:fields`,
-        600,
-        JSON.stringify(res.locals.proto)
-      );
+
+      ///////////////////// OLD PUB SUB //////////////////////////////
+      // for (let key in subscriptions) {
+      //   redisClient.get(`${subscriptions[key]}`, (error, values) => {
+      //     if (error) {
+      //       console.log("redis error", error);
+      //       res.send(error);
+      //     }
+      //     // Case where this query is the first to subscribe to this type.
+      //     if (!values) {
+      //       const subs = [res.locals.querymade];
+      //       // console.log("KEYY?",subscriptions[key]);
+      //       // console
+      //       redisClient.set(subscriptions[key], JSON.stringify(subs));
+      //     } else {
+      //       // Case where other queries are also subscribed to changes of this type.
+      //       const subs = JSON.parse(`${values}`);
+      //       subs.push(res.locals.querymade);
+      //       redisClient.set(subscriptions[key], JSON.stringify(subs));
+      //     }
+      //   });
+      // }
+      ///////////////////// OLD PUB SUB //////////////////////////////
+
+
+        redisClient.setex(
+          res.locals.redisKey,
+          600,
+          JSON.stringify(res.locals.graphQLResponse)
+        );
+        redisClient.setex(
+          `${res.locals.redisKey}:fields`,
+          600,
+          JSON.stringify(res.locals.proto)
+        );
     } else {
+
       // mutation was made, need to clear all subscribers.
       updateRedisAfterMutation(res.locals.graphQLResponse);
     }
     next();
   });
 };
+
+ 
 
 
 
@@ -490,7 +497,6 @@ const checkRedis = async (req: Request, res: Response, next: NextFunction) => {
       const redisValues = JSON.parse(`${values}`);
       //check if fields exist in ^ redisValues 
       const checkIsSubset = isSubset(redisValues, res.locals.proto);
-      console.log(checkIsSubset);
       if(!checkIsSubset){
         console.log("not all fields are found on cache");
       return next();
@@ -535,9 +541,11 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   // console.log("proto to query", querymade);
   res.locals.proto = proto;
   res.locals.querymade = querymade;
-  res.locals.redisKey = parentFieldName;
+  res.locals.redisKey = (fieldArgs) ? parentFieldName + fieldArgs : parentFieldName;
   res.locals.fieldArray = fieldArray;
   res.locals.restructuredQuery = duplicatedASTdata; 
+
+
   next();
 };
 
