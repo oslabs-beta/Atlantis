@@ -71,6 +71,7 @@ const RootQueryType = new GraphQLObjectType({
         company_id: { type: GraphQLInt },
       },
       resolve: async (parent, args) => {
+        console.log(args)
         const result = await db.query(
           `SELECT * FROM company WHERE company_id = $1`,
           [args.company_id]
@@ -83,7 +84,7 @@ const RootQueryType = new GraphQLObjectType({
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
       resolve: async (parent, args, context, info) => {
-        // console.log(info);
+        console.log("INFO",info);
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },

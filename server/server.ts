@@ -2,7 +2,6 @@ import express, { Application, Request, Response, NextFunction } from "express";
 //the extra variables available from express define express types
 import path from "path";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
 import redis from "redis";
 import connectRedis from "connect-redis";
 import session from "express-session";
@@ -10,13 +9,24 @@ import session from "express-session";
 const db = require("./model");
 import { graphqlHTTP } from "express-graphql";
 import { hasUncaughtExceptionCaptureCallback, nextTick } from "process";
-import { graphql, visit, parse, BREAK, assertEnumType } from "graphql";
-import { exists } from "fs";
-import { stringify } from "querystring";
-import { SSL_OP_CIPHER_SERVER_PREFERENCE } from "constants";
+import { graphql, visit, parse, BREAK, assertEnumType, GraphQLSchema, GraphQLArgs } from "graphql";
 const morgan = require("morgan");
 const schema = require("./schema/schema");
+// import {DuplicateFilter} from "./DuplicatedFilter.js";
 
+const {DuplicateFilter} = require("./DuplicatedFilter.js");
+const data: any = {
+  "project": {
+    "project_id": 1,
+    "project_name": "iPhone",
+    "company_id": 2,
+  }
+}
+const dataQuery: any = {
+  "project": ["project_id", "company_id"]
+}
+
+// console.log(DuplicateFilter(data, dataQuery));
 dotenv.config();
 
 const app: Application = express();
@@ -67,6 +77,8 @@ app.use(
   })
 );
 
+
+//console.log("line71", )
 const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
   // console.log("about to make GQL query of ", res.locals.querymade);
@@ -86,6 +98,8 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
           // Case where this query is the first to subscribe to this type.
           if (!values) {
             const subs = [res.locals.querymade];
+            // console.log("KEYY?",subscriptions[key]);
+            // console
             redisClient.set(subscriptions[key], JSON.stringify(subs));
           } else {
             // Case where other queries are also subscribed to changes of this type.
@@ -95,8 +109,9 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
           }
         });
       }
+      //change queryMade back top level field name
       redisClient.setex(
-        res.locals.querymade,
+        res.locals.redisKey,
         600,
         JSON.stringify(res.locals.graphQLResponse)
       );
@@ -107,6 +122,8 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
     next();
   });
 };
+
+
 
 const findAllTypes = (GQLresponse: any, subs: any = []) => {
   for (let key in GQLresponse) {
@@ -164,16 +181,24 @@ const updateRedisAfterMutation = (graphQLResponse: Object) => {
 };
 
 //quellCode for duplicatedAST
-let isQuellable: boolean;
+let isCachable: boolean;
 const parseAST = (AST: any) => {
   // initialize prototype as empty object
   const proto = {};
-  //let isQuellable = true;
+  //let isCachable = true;
+
+  let parentFieldName: string;
 
   let operationType: string;
 
-  const duplicatedproto: any = {};
+  let parentFieldArgs: string;
 
+  let fieldArgs: string
+
+  let argsName: string
+  // const duplicatedproto: any = {};
+
+  const fieldArray: any= [];
   // initialiaze arguments as null
   let protoArgs: any = null; //{ country: { id: '2' } }
 
@@ -193,7 +218,7 @@ const parseAST = (AST: any) => {
     enter(node: any) {
       if (node.directives as any) {
         if (node.directives.length > 0) {
-          isQuellable = false;
+          isCachable = false;
           return BREAK;
         }
       }
@@ -201,21 +226,26 @@ const parseAST = (AST: any) => {
     OperationDefinition(node) {
       operationType = node.operation;
       if (node.operation === "subscription") {
-        operationType = "unQuellable";
+        operationType = "unCachable";
         return BREAK;
       }
     },
     Field: {
       enter(node: any) {
+        fieldArray.push(node.name.value);
+        // fieldArr.push(node.name.value);
         if (node.alias) {
-          operationType = "unQuellable";
+          operationType = "unCachable";
           return BREAK;
         }
         if (node.arguments && node.arguments.length > 0) {
+          fieldArgs = node.arguments[0].value.value
+          argsName = node.arguments[0].name.value
+          // console.log("ARGUMENT?", node);
           protoArgs = protoArgs || {};
           protoArgs[node.name.value] = {};
 
-          // collect arguments if arguments contain id, otherwise make query unquellable
+          // collect arguments if arguments contain id, otherwise make query unCachable
           // hint: can check for graphQl type ID instead of string 'id'
           for (let i = 0; i < node.arguments.length; i++) {
             const key: any = node.arguments[i].name.value;
@@ -224,7 +254,7 @@ const parseAST = (AST: any) => {
             // for queries cache can handle only id as argument
             if (operationType === "query") {
               if (!key.includes("id")) {
-                operationType = "unQuellable";
+                operationType = "unCachable";
                 return BREAK;
               }
             }
@@ -245,9 +275,6 @@ const parseAST = (AST: any) => {
        *  queried fields.
        */
       if (parent.kind === "Field") {
-        
-    
-
         // console.log(parent, "Parent Field")
         // loop through selections to collect fields
         const tempObject: any = {};
@@ -264,11 +291,16 @@ const parseAST = (AST: any) => {
         }, proto);
         protoObj["__typename"] = true;
         // console.log("PROTO OBJ..........", protoObj);
+      }else{
+        console.log("PARENT FIELD?", node.selections[0].name.value);
+        
+        parentFieldName = node.selections[0].name.value;
+        
       }
     },
   });
 
-  return { proto, protoArgs, operationType };
+  return { proto, protoArgs, operationType, parentFieldName, fieldArray, fieldArgs, argsName };
 };
 
 
@@ -277,8 +309,8 @@ const duplicatedASTed = (AST: any) => {
   const proto = {};
   let protoDup:any;
   let layer:string = "";
-  //let isQuellable = true;
-
+  //let isCachable = true;
+  
   let operationType: string;
 
   // initialiaze arguments as null
@@ -300,7 +332,7 @@ const duplicatedASTed = (AST: any) => {
     enter(node: any) {
       if (node.directives as any) {
         if (node.directives.length > 0) {
-          isQuellable = false;
+          isCachable = false;
           return BREAK;
         }
       }
@@ -308,7 +340,7 @@ const duplicatedASTed = (AST: any) => {
     OperationDefinition(node) {
       operationType = node.operation;
       if (node.operation === "subscription") {
-        operationType = "unQuellable";
+        operationType = "unCachable";
         return BREAK;
       }
     },
@@ -316,14 +348,15 @@ const duplicatedASTed = (AST: any) => {
       enter(node: any) {
         // console.log("FIELD........", node);
         if (node.alias) {
-          operationType = "unQuellable";
+          operationType = "unCachable";
           return BREAK;
         }
         if (node.arguments && node.arguments.length > 0) {
           protoArgs = protoArgs || {};
           protoArgs[node.name.value] = {};
-
-          // collect arguments if arguments contain id, otherwise make query unquellable
+          // console.log("node", node.arguments[0].value.value)
+          // console.log("arg id name", node.arguments[0].name.value)
+          // collect arguments if arguments contain id, otherwise make query unCachable
           // hint: can check for graphQl type ID instead of string 'id'
           for (let i = 0; i < node.arguments.length; i++) {
             const key: any = node.arguments[i].name.value;
@@ -332,7 +365,7 @@ const duplicatedASTed = (AST: any) => {
             // for queries cache can handle only id as argument
             if (operationType === "query") {
               if (!key.includes("id")) {
-                operationType = "unQuellable";
+                operationType = "unCachable";
                 return BREAK;
               }
             }
@@ -352,6 +385,7 @@ const duplicatedASTed = (AST: any) => {
        * 'Field' to exclude nodes that do not contain information about
        *  queried fields.
        */
+      
       if (parent.kind === "Field") {
         // console.log("ANCESTORS...", ancestors);
         const tempObj: any = {};
@@ -381,7 +415,6 @@ const duplicatedASTed = (AST: any) => {
             //tempObj = {emplyees: [id, ,...]}
             protoDup[layer].forEach((e: any,i:any)=> {
               if(e === parentName){
-                console.log("LOOPY",e);
             //old employee field replace with new employee object    
                 protoDup[layer][i] =  tempObj;
               }
@@ -435,7 +468,8 @@ const ProtoQueryString = (obj: any, protoArgs: any) => {
 // if query, checks redis for the query.
 const checkRedis = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.ismutation) return next();
-  redisClient.get(res.locals.querymade, (error, values) => {
+  //rqplace res.locals.querymade with redisKey
+  redisClient.get(res.locals.redisKey, (error, values) => {
     if (error) {
       console.log("redis error", error);
       res.send(error);
@@ -444,26 +478,35 @@ const checkRedis = (req: Request, res: Response, next: NextFunction) => {
       console.log("query was not a key in redis session");
       return next();
     } else {
-      // console.log("query was found in cache");
-      // console.log("redisValues", values);
       const redisValues = JSON.parse(`${values}`);
-      // console.log('redis Values are', redisValues);
-      res.locals.graphQLResponse = redisValues;
+      //get the specific field from redis Values based on you know
+      res.locals.graphQLResponse = DuplicateFilter(redisValues, res.locals.restructuredQuery);
       return next();
     }
   });
 };
 
+
+
 const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   const AST: any = parse(req.params.query);
 
   console.log("REQ PARAMS", req.params.query)
-  const { proto, protoArgs, operationType }: any = parseAST(AST);
+  const { proto, protoArgs, operationType,parentFieldName ,fieldArray, fieldArgs, argsName}: any = parseAST(AST);
   console.log("Quell Proto............", proto);
+  // console.log("ProtoArgs", protoArgs);
+  // console.log("PARENT NODE Name", parentFieldName);
+  // console.log("parentFieldArgs", parentFieldArgs)
+  console.log("FIELDARRay", fieldArray);
+  // console.log("FIELD ID", fieldArgs);
+  // console.log("argsName", argsName);
 
+  
   const duplicatedASTdata: any = duplicatedASTed(AST).protoDup;
-
+  // console.log("DUPLICATEDASTDATA", duplicatedASTdata);
+  //proto to String
   let querymade = ProtoQueryString(proto, protoArgs);
+  // console.log("QUERYMADE", querymade);
   // console.log("after PQS");
   if (operationType == "mutation") {
     querymade = "mutation" + querymade;
@@ -471,6 +514,9 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   }
   // console.log("proto to query", querymade);
   res.locals.querymade = querymade;
+  res.locals.redisKey = parentFieldName;
+  res.locals.fieldArray = fieldArray;
+  res.locals.restructuredQuery = duplicatedASTdata; 
   next();
 };
 
@@ -495,8 +541,3 @@ app.listen(PORT, () => {
 
 
 
-// mutation{
-//   updateCompany(company_id: 2, name: "Googles", description:"SE"){
-//     name
-//   }
-// }
