@@ -9,7 +9,6 @@ import { makeGQLrequest } from './helperFunctions/makeGQLrequest';
 
 const atlantis = (redisClient: any, schema:any) => async (req: any, res: any, next: any) =>{
 
-
     if (!req.body) return next()
 
     const AST = parse(req.body.query);
@@ -27,7 +26,6 @@ const atlantis = (redisClient: any, schema:any) => async (req: any, res: any, ne
           res.locals.queryResponse = makeGQLrequest(redisClient, schema, redisKey, querymade, proto, operationType)
         } else {
           const redisValues = JSON.parse(`${values}`);
-
           //check if cache has data that incoming queries need
           const resultFromIsSubset = isSubset(redisValues, proto);
           //not found, fetch data from database
