@@ -1,44 +1,32 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response, NextFunction } from 'express';
 //the extra variables available from express define express types
-import path from "path";
-import dotenv from "dotenv";
-import redis from "redis";
+import path from 'path';
+import dotenv from 'dotenv';
+import redis from 'redis';
 //if curious see package.json, had to install types for some of these dependencies to work with TS
-import { graphqlHTTP } from "express-graphql";
-import { graphql, visit, parse, BREAK} from "graphql";
-const morgan = require("morgan");
-const schema = require("./schema/schema");
-const {atlantis} = require('atlantis-cache')
+import { graphqlHTTP } from 'express-graphql';
+import { graphql, visit, parse, BREAK } from 'graphql';
+const morgan = require('morgan');
+const schema = require('./schema/schema');
+const { atlantis } = require('atlantis-cache');
 
+const { parseDataFromCache } = require('./parseDataFromCache.ts');
 
-const {parseDataFromCache} = require("./parseDataFromCache.ts");
-
-dotenv.config()
+dotenv.config();
 
 const redisClient = redis.createClient({
-  host: "localhost",
+  host: 'localhost',
   port: 6379,
 });
 
-
 const app: Application = express();
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(morgan('dev'));
+app.use(express.static(path.join(__dirname, './views')));
 
-
-
-app.use("/graphql",
-atlantis(redisClient,schema),
-// graphqlHTTP({
-//   schema: schema,
-//   graphiql: true,
-// })
-(req, res) => {
-      return res
-        .status(200)
-        .send(res.locals.queryResponse)
-    }
-)
+app.use('/atlantis', atlantis(redisClient, schema), (req, res) => {
+  return res.status(200).send(res.locals.queryResponse);
+});
 
 // app.use(
 //   "/atlantis",
@@ -51,16 +39,13 @@ atlantis(redisClient,schema),
 // );
 // app.use(atlantis(redisClient));
 
-
-
-
 const getMutationMap = (schema: any) => {
   const mutationMap: any = {};
   // get object containing all root mutations defined in the schema
   const mutationTypeFields = schema._mutationType._fields;
   // if queryTypeFields is a function, invoke it to get object with queries
   const mutationsObj =
-    typeof mutationTypeFields === "function"
+    typeof mutationTypeFields === 'function'
       ? mutationTypeFields()
       : mutationTypeFields;
 
@@ -84,59 +69,59 @@ const PORT = process.env.PORT || 3000;
 
 ////// FIX \\\\\\\\
 
-
 app.use(
-  "/graphql",
+  '/graphql',
   graphqlHTTP({
     schema: schema,
     graphiql: true,
   })
 );
 
-
-
 const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.graphQLResponse) return next();
-  console.log("Query to GQL is : ", res.locals.querymade);
+  console.log('Query to GQL is : ', res.locals.querymade);
   graphql(schema, res.locals.querymade).then((response) => {
     res.locals.graphQLResponse = response.data;
     // console.log("GQL responded with", response);
     if (!res.locals.ismutation) {
-      
       const subscriptions = foundTypes(res.locals.graphQLResponse);
       // subscribe the query to mutations of type subscription
       for (let key in subscriptions) {
-        
         redisClient.get(`${subscriptions[key]}:Publisher`, (error, values) => {
           if (error) {
-            console.log("redis error", error);
+            console.log('redis error', error);
             res.send(error);
           }
           // Case where this query is the first to subscribe to this type.
           // Create a key, and subscribe the query to that key.
           if (!values) {
-              const subs = [res.locals.redisKey, `${res.locals.redisKey}:fields`];
-              redisClient.set(`${subscriptions[key]}:Publisher`, JSON.stringify(subs));
+            const subs = [res.locals.redisKey, `${res.locals.redisKey}:fields`];
+            redisClient.set(
+              `${subscriptions[key]}:Publisher`,
+              JSON.stringify(subs)
+            );
           } else {
             // Case where other queries are also subscribed to changes of this type.
             const subs = JSON.parse(`${values}`);
             subs.push(res.locals.redisKey);
             subs.push(`${res.locals.redisKey}:fields`);
-            redisClient.set(`${subscriptions[key]}:Publisher`, JSON.stringify(subs));
-          };
-        
+            redisClient.set(
+              `${subscriptions[key]}:Publisher`,
+              JSON.stringify(subs)
+            );
+          }
         });
       }
-      //store key-value for graphqlRespose from the database 
-        redisClient.set(
-          res.locals.redisKey,
-          JSON.stringify(res.locals.graphQLResponse)
-        );
-        //store another key-value for store parsedAST
-        redisClient.set(
-          `${res.locals.redisKey}:fields`,
-          JSON.stringify(res.locals.proto)
-        );
+      //store key-value for graphqlRespose from the database
+      redisClient.set(
+        res.locals.redisKey,
+        JSON.stringify(res.locals.graphQLResponse)
+      );
+      //store another key-value for store parsedAST
+      redisClient.set(
+        `${res.locals.redisKey}:fields`,
+        JSON.stringify(res.locals.proto)
+      );
     } else {
       // Mutation was made, clear all keys subscribed to the mutation
       updateRedisAfterMutation(res.locals.graphQLResponse);
@@ -146,23 +131,22 @@ const makeGQLrequest = (req: Request, res: Response, next: NextFunction) => {
 };
 
 //extract __typenames after GraphQL Response
-const foundTypes = (graphQLResponse:any)=> {
-    const stringy = JSON.stringify(graphQLResponse)
-    let regex = /(__typename)\":\"(.+?)\"/g;
-    let found = new Set(stringy.match(regex))
+const foundTypes = (graphQLResponse: any) => {
+  const stringy = JSON.stringify(graphQLResponse);
+  let regex = /(__typename)\":\"(.+?)\"/g;
+  let found = new Set(stringy.match(regex));
 
-    const subArr = []
-    for(let item of found){
-      let newItem = item.slice(13, -1);
-      subArr.push(newItem);
-    }
-    return subArr;
-}
-
+  const subArr = [];
+  for (let item of found) {
+    let newItem = item.slice(13, -1);
+    subArr.push(newItem);
+  }
+  return subArr;
+};
 
 const updateRedisAfterMutation = (graphQLResponse: Object) => {
   // get the type of mutation from the first key in GQLresponse
-  console.log("Update Graphql", graphQLResponse)
+  console.log('Update Graphql', graphQLResponse);
   const mutation = Object.keys(graphQLResponse)[0];
   // get subscribed tables to the mutation from the mutation map
   const subscribedTable = getMutationMap(schema);
@@ -170,7 +154,7 @@ const updateRedisAfterMutation = (graphQLResponse: Object) => {
   // query redis for key to clear
   redisClient.get(`${keyToClear}`, (error, values) => {
     if (error) {
-      console.log("redis error", error);
+      console.log('redis error', error);
     }
     const queriesToClear = JSON.parse(`${values}`);
     if (queriesToClear) {
@@ -179,9 +163,9 @@ const updateRedisAfterMutation = (graphQLResponse: Object) => {
         redisClient.del(queriesToClear[i], (err, res) => {
           // Display result of the Redis subscriber clearing
           if (res === 1) {
-            console.log("Deleted successfully");
+            console.log('Deleted successfully');
           } else {
-            console.log("Item to be cleared was not found in redis");
+            console.log('Item to be cleared was not found in redis');
           }
         });
       }
@@ -189,14 +173,13 @@ const updateRedisAfterMutation = (graphQLResponse: Object) => {
     // After subscribers array is cleared, delete the subscribed key.
     redisClient.del(`${keyToClear}`, (err, res) => {
       if (res === 1) {
-        console.log("Deleted the Subscriber Key successfully");
+        console.log('Deleted the Subscriber Key successfully');
       } else {
-        console.log("Failed to delete the Subscriber Key");
+        console.log('Failed to delete the Subscriber Key');
       }
     });
   });
 };
-
 
 const parseAST = (AST: any) => {
   // initialize prototype as empty object
@@ -208,14 +191,14 @@ const parseAST = (AST: any) => {
 
   let parentFieldArgs: string;
 
-  let fieldArgs: string
+  let fieldArgs: string;
 
-  let argsName: string
+  let argsName: string;
   // const duplicatedproto: any = {};
 
-  const fieldArray: any= [];
+  const fieldArray: any = [];
   // initialiaze arguments as null
-  let protoArgs: any = null; 
+  let protoArgs: any = null;
 
   // initialize stack to keep track of depth first parsing
   const stack: any[] = [];
@@ -240,8 +223,8 @@ const parseAST = (AST: any) => {
     },
     OperationDefinition(node) {
       operationType = node.operation;
-      if (node.operation === "subscription") {
-        operationType = "unCachable";
+      if (node.operation === 'subscription') {
+        operationType = 'unCachable';
         return BREAK;
       }
     },
@@ -250,12 +233,12 @@ const parseAST = (AST: any) => {
         fieldArray.push(node.name.value);
         // fieldArr.push(node.name.value);
         if (node.alias) {
-          operationType = "unCachable";
+          operationType = 'unCachable';
           return BREAK;
         }
         if (node.arguments && node.arguments.length > 0) {
-          fieldArgs = node.arguments[0].value.value
-          argsName = node.arguments[0].name.value
+          fieldArgs = node.arguments[0].value.value;
+          argsName = node.arguments[0].name.value;
           // console.log("ARGUMENT?", node);
           protoArgs = protoArgs || {};
           protoArgs[node.name.value] = {};
@@ -267,9 +250,9 @@ const parseAST = (AST: any) => {
             const value: any = node.arguments[i].value.value;
 
             // for queries cache can handle only id as argument
-            if (operationType === "query") {
-              if (!key.includes("id")) {
-                operationType = "unCachable";
+            if (operationType === 'query') {
+              if (!key.includes('id')) {
+                operationType = 'unCachable';
                 return BREAK;
               }
             }
@@ -285,8 +268,7 @@ const parseAST = (AST: any) => {
       },
     },
     SelectionSet(node: any, key, parent: any, path, ancestors) {
-      if (parent.kind === "Field") {
-
+      if (parent.kind === 'Field') {
         const tempObject: any = {};
         for (let field of node.selections) {
           tempObject[field.name.value] = true;
@@ -298,43 +280,50 @@ const parseAST = (AST: any) => {
             ? (prev[curr] = tempObject) // set value
             : (prev[curr] = prev[curr]); // otherwise, if index exists, keep value
         }, proto);
-        protoObj["__typename"] = true;
-      }else{
-        
+        protoObj['__typename'] = true;
+      } else {
         parentFieldName = node.selections[0].name.value;
-        
       }
     },
   });
 
-  return { proto, protoArgs, operationType, parentFieldName, fieldArray, fieldArgs, argsName };
+  return {
+    proto,
+    protoArgs,
+    operationType,
+    parentFieldName,
+    fieldArray,
+    fieldArgs,
+    argsName,
+  };
 };
-
 
 //parse AST and store fields as nested json object
 const duplicatedAST = (AST: any) => {
-  let fields_Object:any;
-  let layer:string = "";  
+  let fields_Object: any;
+  let layer: string = '';
 
   visit(AST, {
     SelectionSet(node: any, key, parent: any) {
-     if (parent.kind === "Field") {
+      if (parent.kind === 'Field') {
         const tempObj: any = {};
         const parentName = parent.name.value;
-        if(layer.length === 0){layer = parentName};
+        if (layer.length === 0) {
+          layer = parentName;
+        }
         const tempArray: any = [];
-          node.selections.forEach((e:any) => tempArray.push(e.name.value));
-          tempObj[parentName] = tempArray;
-          if(!fields_Object){
-            fields_Object = tempObj;
-          }else{
-            fields_Object[layer].forEach((e: any,i:any)=> {
-              if(e === parentName){
-                fields_Object[layer][i] =  tempObj;
-              }
-            })
-            layer = parentName;
-          }
+        node.selections.forEach((e: any) => tempArray.push(e.name.value));
+        tempObj[parentName] = tempArray;
+        if (!fields_Object) {
+          fields_Object = tempObj;
+        } else {
+          fields_Object[layer].forEach((e: any, i: any) => {
+            if (e === parentName) {
+              fields_Object[layer][i] = tempObj;
+            }
+          });
+          layer = parentName;
+        }
       }
     },
   });
@@ -344,28 +333,28 @@ const duplicatedAST = (AST: any) => {
 // Parse through AST proto and convert it into a GQL query string
 const protoQueryString = (obj: any, protoArgs: any) => {
   const argsToQuery = (protoArgs: any) => {
-    let string = "";
+    let string = '';
     for (let key in protoArgs) {
       for (let innerKey in protoArgs[key]) {
         // accounts for edge case where an Int is passed in as an arguement.
         if (!isNaN(protoArgs[key][innerKey])) {
-          string += innerKey + ": " + protoArgs[key][innerKey] + " ";
+          string += innerKey + ': ' + protoArgs[key][innerKey] + ' ';
           break;
         }
-        string += innerKey + ": " + '"' + protoArgs[key][innerKey] + '"' + " ";
+        string += innerKey + ': ' + '"' + protoArgs[key][innerKey] + '"' + ' ';
       }
     }
-    return "(" + string + ")";
+    return '(' + string + ')';
   };
 
-  let mainString = "";
+  let mainString = '';
   for (let key in obj) {
-    if (typeof obj[key] !== "object") {
-      mainString += " " + key + " ";
+    if (typeof obj[key] !== 'object') {
+      mainString += ' ' + key + ' ';
     } else {
-      mainString += " " + key + " ";
+      mainString += ' ' + key + ' ';
       if (protoArgs) {
-        if (typeof protoArgs[key] == "object") {
+        if (typeof protoArgs[key] == 'object') {
           const inner = argsToQuery(protoArgs);
           mainString += inner;
         }
@@ -373,81 +362,88 @@ const protoQueryString = (obj: any, protoArgs: any) => {
       mainString += protoQueryString(obj[key], {});
     }
   }
-  return "{" + mainString + "}";
+  return '{' + mainString + '}';
 };
 
-
-
-//check if all fields from incoming request match with fields stored in redis caches 
+//check if all fields from incoming request match with fields stored in redis caches
 // return boolean
-const isSubset = (superObj: any, subObj: any):boolean => {
-  return Object.keys(subObj).every(ele => {
-      if (typeof subObj[ele] == 'object') {
-          return isSubset(superObj[ele], subObj[ele]);
-      }
-      if(!subObj || !superObj) return false;
-      return subObj[ele] === superObj[ele]
+const isSubset = (superObj: any, subObj: any): boolean => {
+  return Object.keys(subObj).every((ele) => {
+    if (typeof subObj[ele] == 'object') {
+      return isSubset(superObj[ele], subObj[ele]);
+    }
+    if (!subObj || !superObj) return false;
+    return subObj[ele] === superObj[ele];
   });
 };
-
 
 const checkRedis = async (req: Request, res: Response, next: NextFunction) => {
   if (res.locals.ismutation) return next();
   //check if similar queries have been stored in the database
   redisClient.get(`${res.locals.redisKey}:fields`, (error, values) => {
     if (error) {
-      console.log("redis error", error);
+      console.log('redis error', error);
       res.send(error);
     }
     if (!values) {
-      console.log("similar query is not found in redis");
+      console.log('similar query is not found in redis');
       return next();
     } else {
       const redisValues = JSON.parse(`${values}`);
       //check if cache has data that incoming queries need
       const resultFromIsSubset = isSubset(redisValues, res.locals.proto);
       //not found, fetch data from database
-      if(!resultFromIsSubset){
-        console.log("not all fields are found on cache,");
-      return next();
+      if (!resultFromIsSubset) {
+        console.log('not all fields are found on cache,');
+        return next();
       }
       //get data from cache
-      redisClient.get(res.locals.redisKey, (err, values)=>{
+      redisClient.get(res.locals.redisKey, (err, values) => {
         const redisValues = JSON.parse(`${values}`);
-        console.log("fetch data from cache")
-        res.locals.graphQLResponse =parseDataFromCache(redisValues, res.locals.restructuredQuery);
+        console.log('fetch data from cache');
+        res.locals.graphQLResponse = parseDataFromCache(
+          redisValues,
+          res.locals.restructuredQuery
+        );
         return next();
-      })
+      });
     }
   });
 };
 
-
-
 const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   const AST: any = parse(req.params.query);
-  const { proto, protoArgs, operationType, parentFieldName ,fieldArray, fieldArgs}: any = parseAST(AST);
+  const {
+    proto,
+    protoArgs,
+    operationType,
+    parentFieldName,
+    fieldArray,
+    fieldArgs,
+  }: any = parseAST(AST);
   //
   const parsedASTObj: any = duplicatedAST(AST).fields_Object;
-  console.log("Dupliacted AST",parsedASTObj);
+  console.log('Dupliacted AST', parsedASTObj);
   //query made: grapql string with __typename
   let querymade = protoQueryString(proto, protoArgs);
   //attach mutation with graphql string
-  if (operationType == "mutation") {
-    querymade = "mutation" + querymade;
+  if (operationType == 'mutation') {
+    querymade = 'mutation' + querymade;
     res.locals.ismutation = true;
   }
   res.locals.proto = proto;
   res.locals.querymade = querymade;
   res.locals.fieldArgs = fieldArgs;
-  res.locals.redisKey = (fieldArgs) ? parentFieldName + fieldArgs : parentFieldName;
-  res.locals.restructuredQuery = parsedASTObj; 
+  res.locals.redisKey = fieldArgs
+    ? parentFieldName + fieldArgs
+    : parentFieldName;
+  res.locals.restructuredQuery = parsedASTObj;
 
   next();
 };
 
 app.get(
-  "/atlantis/:query",
+  '/atlantis/:query',
   parsingAlgo,
   checkRedis,
   makeGQLrequest,
@@ -456,15 +452,12 @@ app.get(
   }
 );
 
-app.get("/", (req: Request, res: Response) => {
-  return res.status(200).sendFile(path.join(__dirname, "./views/index.html"));
+app.get('/', (req: Request, res: Response) => {
+  return res.status(200).sendFile(path.join(__dirname, './views/index.html'));
 });
 
 app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`);
 });
-
-
-
 
 export { foundTypes, parseAST, protoQueryString, duplicatedAST, isSubset };

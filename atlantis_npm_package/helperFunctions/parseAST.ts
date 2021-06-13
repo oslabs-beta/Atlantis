@@ -1,4 +1,4 @@
-import { graphql, visit, parse, BREAK} from "graphql";
+import { visit, BREAK } from 'graphql';
 
 const parseAST = (AST: any) => {
   // initialize prototype as empty object
@@ -10,12 +10,12 @@ const parseAST = (AST: any) => {
 
   let parentFieldArgs: string;
 
-  let fieldArgs: string
+  let fieldArgs: string;
 
-  let argsName: string
+  let argsName: string;
 
   // initialiaze arguments as null
-  let protoArgs: any = null; 
+  let protoArgs: any = null;
 
   // initialize stack to keep track of depth first parsing
   const stack: any[] = [];
@@ -40,8 +40,8 @@ const parseAST = (AST: any) => {
     },
     OperationDefinition(node) {
       operationType = node.operation;
-      if (node.operation === "subscription") {
-        operationType = "unCachable";
+      if (node.operation === 'subscription') {
+        operationType = 'unCachable';
         return BREAK;
       }
     },
@@ -49,12 +49,12 @@ const parseAST = (AST: any) => {
       enter(node: any) {
         // fieldArr.push(node.name.value);
         if (node.alias) {
-          operationType = "unCachable";
+          operationType = 'unCachable';
           return BREAK;
         }
         if (node.arguments && node.arguments.length > 0) {
-          fieldArgs = node.arguments[0].value.value
-          argsName = node.arguments[0].name.value
+          fieldArgs = node.arguments[0].value.value;
+          argsName = node.arguments[0].name.value;
           protoArgs = protoArgs || {};
           protoArgs[node.name.value] = {};
 
@@ -65,9 +65,9 @@ const parseAST = (AST: any) => {
             const value: any = node.arguments[i].value.value;
 
             // for queries cache can handle only id as argument
-            if (operationType === "query") {
-              if (!key.includes("id")) {
-                operationType = "unCachable";
+            if (operationType === 'query') {
+              if (!key.includes('id')) {
+                operationType = 'unCachable';
                 return BREAK;
               }
             }
@@ -83,8 +83,7 @@ const parseAST = (AST: any) => {
       },
     },
     SelectionSet(node: any, key, parent: any, path, ancestors) {
-      if (parent.kind === "Field") {
-
+      if (parent.kind === 'Field') {
         const tempObject: any = {};
         for (let field of node.selections) {
           tempObject[field.name.value] = true;
@@ -96,16 +95,21 @@ const parseAST = (AST: any) => {
             ? (prev[curr] = tempObject) // set value
             : (prev[curr] = prev[curr]); // otherwise, if index exists, keep value
         }, proto);
-        protoObj["__typename"] = true;
-      }else{
-        
+        protoObj['__typename'] = true;
+      } else {
         parentFieldName = node.selections[0].name.value;
-        
       }
     },
   });
 
-  return { proto, protoArgs, operationType, parentFieldName, fieldArgs, argsName };
+  return {
+    proto,
+    protoArgs,
+    operationType,
+    parentFieldName,
+    fieldArgs,
+    argsName,
+  };
 };
 
-export {parseAST}
+export { parseAST };

@@ -4,7 +4,7 @@ const getMutationMap = (schema: any) => {
   const mutationTypeFields = schema._mutationType._fields;
   // if queryTypeFields is a function, invoke it to get object with queries
   const mutationsObj =
-    typeof mutationTypeFields === "function"
+    typeof mutationTypeFields === 'function'
       ? mutationTypeFields()
       : mutationTypeFields;
 
@@ -24,4 +24,4 @@ const getMutationMap = (schema: any) => {
   return mutationMap;
 };
 
-export { getMutationMap }
+export { getMutationMap };
