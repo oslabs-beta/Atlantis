@@ -8,15 +8,40 @@ import { graphqlHTTP } from "express-graphql";
 import { graphql, visit, parse, BREAK} from "graphql";
 const morgan = require("morgan");
 const schema = require("./schema/schema");
+const {atlantis} = require('atlantis-cache')
 
 
 const {parseDataFromCache} = require("./parseDataFromCache.ts");
 
 dotenv.config()
 
+const redisClient = redis.createClient({
+  host: "localhost",
+  port: 6379,
+});
+
+
 const app: Application = express();
 app.use(express.json());
 app.use(morgan("dev"));
+
+const test = (req: any, res:any, next: any)=>{
+  console.log(req.body.query);
+  next();
+}
+
+app.use(
+  "/graphql",
+  atlantis(redisClient,schema),
+  graphqlHTTP({
+    schema: schema,
+    graphiql: true,
+  })
+);
+
+// app.use(atlantis(redisClient));
+
+
 
 
 const getMutationMap = (schema: any) => {
@@ -48,10 +73,7 @@ const getMutationMap = (schema: any) => {
 const PORT = process.env.PORT || 3000;
 
 ////// FIX \\\\\\\\
-const redisClient = redis.createClient({
-  host: "localhost",
-  port: 6379,
-});
+
 
 app.use(
   "/graphql",
@@ -409,7 +431,6 @@ const parsingAlgo = (req: Request, res: Response, next: NextFunction) => {
   res.locals.querymade = querymade;
   res.locals.fieldArgs = fieldArgs;
   res.locals.redisKey = (fieldArgs) ? parentFieldName + fieldArgs : parentFieldName;
-  res.locals.fieldArray = fieldArray;
   res.locals.restructuredQuery = parsedASTObj; 
 
   next();

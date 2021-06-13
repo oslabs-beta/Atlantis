@@ -2,7 +2,7 @@ import { query } from 'express';
 import { getTokenSourceMapRange } from 'typescript';
 import { graphql, visit, parse, BREAK } from 'graphql';
 import { foundTypes, parseAST, protoQueryString, duplicatedAST , isSubset } from '../server/server';
-import { parseDataFromCache } from '../server/parseDataFromCache';
+import { parseDataFromCache } from '../atlantis_npm_package/helperFunctions/parseDataFromCache';
 // import { parseAST, ProtoQueryString, findAllTypes } from '../server/server';
 
 // const testRoute: string = `http://localhost:3000/cachetest/`;

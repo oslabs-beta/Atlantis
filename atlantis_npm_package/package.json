@@ -1,0 +1,14 @@
+{
+  "name": "atlantis-cache",
+  "version": "1.0.0",
+  "description": "Light-weight serverside graphQL caching solution",
+  "main": "atlantis.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "graphql": "^15.5.0"
+  }
+}

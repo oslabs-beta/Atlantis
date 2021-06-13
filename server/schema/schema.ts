@@ -82,7 +82,6 @@ const RootQueryType = new GraphQLObjectType({
         company_id: { type: GraphQLInt },
       },
       resolve: async (parent, args, context, info) => {
-        console.log("ARGS",args);
         if(Object.keys(args).length !== 0){
           const result = await db.query(
             `SELECT * FROM company WHERE company_id = $1`,
