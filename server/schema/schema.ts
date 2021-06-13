@@ -203,7 +203,7 @@ const mutation: any = new GraphQLObjectType({
           'UPDATE public.user SET name=$1, company_id=$2 WHERE user_id=$3 RETURNING *;',
           [name, company_id, user_id]
         );
-        console.log(result.rows[0]);
+        console.log("Return form DB",result.rows[0]);
         return result.rows[0];
       },
     },

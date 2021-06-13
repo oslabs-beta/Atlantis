@@ -4,12 +4,16 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --detectOpenHandles",
     "start": "nodemon server/server.ts",
     "build": "tsc"
   },
   "author": "coral",
   "license": "ISC",
+  "jest": {
+    "globalSetup": "./jest-setup.js",
+    "globalTeardown": "./jest-teardown.js"
+  },
   "dependencies": {
     "@types/express-session": "^1.17.3",
     "connect-redis": "^5.2.0",
@@ -18,16 +22,19 @@
     "express-graphql": "^0.12.0",
     "express-session": "^1.17.2",
     "graphql": "^14.7.0",
-    "nested-object-filter": "^1.2.3",
+    "jest": "^27.0.4",
     "node-fetch": "^2.6.1",
     "pg": "^8.6.0",
     "redis": "^3.1.2",
+    "shelljs": "^0.8.4",
+    "ts-jest": "^27.0.3",
     "type-graphql": "^1.1.1"
   },
   "devDependencies": {
     "@types/connect-redis": "0.0.16",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.11",
+    "@types/jest": "26.0.23",
     "@types/node": "^15.3.0",
     "@types/node-fetch": "^2.5.10",
     "@types/redis": "^2.8.28",
