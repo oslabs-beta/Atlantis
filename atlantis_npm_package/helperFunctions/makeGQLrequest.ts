@@ -1,22 +1,20 @@
 import { graphql } from "graphql";
 import { foundTypes } from "./foundTypes"
+import {updateRedisAfterMutation} from './updateRedisAfterMutation';
 
-
-const makeGQLrequest = (redisClient:any, schema:any, redisKey:any, querymade:any, proto:any) => {
-    console.log("Query to GQL is : ", querymade);
-    console.log("schema is : ", schema);
+const makeGQLrequest = (redisClient:any, schema:any, redisKey:any, querymade:any, proto:any, operationType:any) => {
     graphql(schema, querymade).then((response) => {
-      const graphQLResponse = response.data;
-      // console.log("GQL responded with", response);
-    //   if (!res.locals.ismutation) {
-        
+     const graphQLResponse = response.data;
+
+       if (operationType !== "mutation") {
+        //// needs to get skipped 
         const subscriptions = foundTypes(graphQLResponse);
         // subscribe the query to mutations of type subscription
         for (let key in subscriptions) {
           
           redisClient.get(`${subscriptions[key]}:Publisher`, (error:any, values:any) => {
             if (error) {
-              console.log("Atlantis -- redis error", error);
+              ///// |||| \\\\\\ IMPORTANT
               return
             }
             // Case where this query is the first to subscribe to this type.
@@ -44,15 +42,14 @@ const makeGQLrequest = (redisClient:any, schema:any, redisKey:any, querymade:any
             `${redisKey}:fields`,
             JSON.stringify(proto)
           );
-    //   } else {
-    //     // Mutation was made, clear all keys subscribed to the mutation
-    //     updateRedisAfterMutation(res.locals.graphQLResponse);
-    //   }
-            return graphQLResponse;
+
+      } else {
+
+        updateRedisAfterMutation(redisClient, schema, graphQLResponse);
+      }
+            return graphQLResponse
     });
   };
-
-
 
 
 

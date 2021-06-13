@@ -55,7 +55,6 @@ const parseAST = (AST: any) => {
         if (node.arguments && node.arguments.length > 0) {
           fieldArgs = node.arguments[0].value.value
           argsName = node.arguments[0].name.value
-          // console.log("ARGUMENT?", node);
           protoArgs = protoArgs || {};
           protoArgs[node.name.value] = {};
 

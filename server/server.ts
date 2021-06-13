@@ -25,20 +25,30 @@ const app: Application = express();
 app.use(express.json());
 app.use(morgan("dev"));
 
-const test = (req: any, res:any, next: any)=>{
-  console.log(req.body.query);
-  next();
-}
 
-app.use(
-  "/graphql",
-  atlantis(redisClient,schema),
-  graphqlHTTP({
-    schema: schema,
-    graphiql: true,
-  })
-);
 
+app.use("/graphql",
+atlantis(redisClient,schema),
+// graphqlHTTP({
+//   schema: schema,
+//   graphiql: true,
+// })
+(req, res) => {
+      return res
+        .status(200)
+        .send(res.locals.queryResponse)
+    }
+)
+
+// app.use(
+//   "/atlantis",
+//   atlantis(redisClient,schema),
+//   (req, res) => {
+//     return res
+//       .status(200)
+//       .send(res.locals.queryResponse)
+//   }
+// );
 // app.use(atlantis(redisClient));
 
 
