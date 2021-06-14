@@ -7,25 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
   Taskdiv.innerHTML = 'from the JS script';
   Taskdiv.id = 'task-div';
   document.body.append(Taskdiv);
-});
-
-// when query clicked
-console.log('HELLO');
-document.getElementById('query-button').addEventListener('click', () => {
-  const query = document.getElementById('task');
-  const queryValue = query.value;
-  // assign the value of the input to body so we can send it to the DB.
-  const body = { query: queryValue };
-  console.log(body);
-  fetch('/atlantis', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(body),
-  }).then((res) => {
-    console.log('Post fetch is successful', res);
-    res.json();
+  document.getElementById('query-button').addEventListener('click', () => {
+    const query = document.getElementById('task');
+    const queryValue = query.value;
+    // assign the value of the input to body so we can send it to the DB.
+    const body = { query: queryValue };
+    console.log(body);
+    fetch('/atlantis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }).then((res) => res.json())
+    .then(data=> console.log("data found in cache", data));
   });
+  
 });

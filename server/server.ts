@@ -8,11 +8,12 @@ import { graphqlHTTP } from 'express-graphql';
 import { graphql, visit, parse, BREAK } from 'graphql';
 const morgan = require('morgan');
 const schema = require('./schema/schema');
-const { atlantis } = require('atlantis-cache');
+// const { atlantis } = require('atlantis-cache');
+const { atlantis } = require('../src/index');
+
 const { parseDataFromCache } = require('./parseDataFromCache.ts');
 
 dotenv.config();
-
 const redisClient = redis.createClient({
   host: 'localhost',
   port: 6379,
@@ -22,8 +23,9 @@ const app: Application = express();
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, './views')));
+
 app.use('/atlantis', atlantis(redisClient, schema), async (req, res) => {
-  return res.send(res.locals.graphQLResponse);
+  return res.status(202).json({ data: res.locals.queryResponse });
 });
 
 app.use('/graphql',

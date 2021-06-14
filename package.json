@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@types/express-session": "^1.17.3",
-    "atlantis-cache": "^1.0.0",
+    "atlantis-cache": "^3.0.0",
     "connect-redis": "^5.2.0",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
