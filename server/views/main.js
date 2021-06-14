@@ -17,12 +17,15 @@ document.getElementById('query-button').addEventListener('click', () => {
   // assign the value of the input to body so we can send it to the DB.
   const body = { query: queryValue };
   console.log(body);
-  fetch('http://localhost:3000/atlantis/', {
+  fetch('/atlantis', {
     method: 'POST',
-    headers: { 'Content-Type': 'Application/JSON' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
     body: JSON.stringify(body),
   }).then((res) => {
     console.log('Post fetch is successful', res);
-    return res.json();
+    res.json();
   });
 });

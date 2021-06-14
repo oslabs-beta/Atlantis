@@ -9,7 +9,6 @@ import { graphql, visit, parse, BREAK } from 'graphql';
 const morgan = require('morgan');
 const schema = require('./schema/schema');
 const { atlantis } = require('atlantis-cache');
-
 const { parseDataFromCache } = require('./parseDataFromCache.ts');
 
 dotenv.config();
@@ -23,10 +22,16 @@ const app: Application = express();
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, './views')));
-
-app.use('/atlantis', atlantis(redisClient, schema), (req, res) => {
-  return res.status(200).send(res.locals.queryResponse);
+app.use('/atlantis', atlantis(redisClient, schema), async (req, res) => {
+  return res.send(res.locals.graphQLResponse);
 });
+
+app.use('/graphql',
+  graphqlHTTP({
+    schema: schema,
+    graphiql: true,
+  })
+)
 
 // app.use(
 //   "/atlantis",
