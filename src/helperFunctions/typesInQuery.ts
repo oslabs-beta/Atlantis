@@ -1,5 +1,6 @@
-//extract __typenames after GraphQL Response
-const foundTypes = (graphQLResponse: any) => {
+
+/* extract __typenames after making a database request with Regex */
+const typesInQuery = (graphQLResponse: any) => {
   const stringy = JSON.stringify(graphQLResponse);
   let regex = /(__typename)\":\"(.+?)\"/g;
   let found = new Set(stringy.match(regex));
@@ -12,4 +13,4 @@ const foundTypes = (graphQLResponse: any) => {
   return subArr;
 };
 
-export { foundTypes };
+export { typesInQuery };

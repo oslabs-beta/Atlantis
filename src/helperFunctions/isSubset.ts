@@ -1,10 +1,11 @@
-const isSubset = (superObj: any, subObj: any): boolean => {
-  return Object.keys(subObj).every((ele) => {
-    if (typeof subObj[ele] == 'object') {
-      return isSubset(superObj[ele], subObj[ele]);
+/* compare incoming queryStructure and existing queryStructure in redis to determine if all the fields in the incoming query exist in the cache*/
+const isSubset = (rootObj: any, subObj: any): boolean => {
+  return Object.keys(subObj).every((el) => {
+    if (typeof subObj[el] == 'object') {
+      return isSubset(rootObj[el], subObj[el]);
     }
-    if (!subObj || !superObj) return false;
-    return subObj[ele] === superObj[ele];
+    if (!subObj || !rootObj) return false;
+    return subObj[el] === rootObj[el];
   });
 };
 

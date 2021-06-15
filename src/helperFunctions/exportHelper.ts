@@ -1,14 +1,14 @@
-import { parseAST } from './parseAST';
-import { duplicatedParseAST } from './duplicateParseAST';
-import { protoQueryString } from './protoQueryString';
+import { traverseAST } from './traverseAST';
+import { restructureAST } from './restructureAST';
+import { structureToString } from './structureToString';
 import { isSubset } from './isSubset';
 import { parseDataFromCache } from './parseDataFromCache';
 import { makeGQLrequest } from './makeGQLrequest';
 
 export {
-  parseAST,
-  duplicatedParseAST,
-  protoQueryString,
+  traverseAST,
+  restructureAST,
+  structureToString,
   isSubset,
   parseDataFromCache,
   makeGQLrequest,

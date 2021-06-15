@@ -1,6 +1,6 @@
 import { visit } from 'graphql';
 
-const duplicatedParseAST = (AST: any) => {
+const restructureAST = (AST: any) => {
   let fields_Object: any;
   let layer: string = '';
 
@@ -31,4 +31,4 @@ const duplicatedParseAST = (AST: any) => {
   return fields_Object;
 };
 
-export { duplicatedParseAST };
+export { restructureAST };

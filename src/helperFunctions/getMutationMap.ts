@@ -1,3 +1,5 @@
+
+
 const getMutationMap = (schema: any) => {
   const mutationMap: any = {};
   // get object containing all root mutations defined in the schema

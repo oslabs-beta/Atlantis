@@ -1,21 +1,44 @@
-const ObjectFilter = (jsonObj: any, queryArr: any[]) => {
+
+/*ParseDataFromCache traverses redis's cache and filters object properties by keys from prototype object*/
+function parseDataFromCache(cacheObj: any, fieldObj: any) {
+  const result: any = {};
+
+  Object.keys(cacheObj).forEach((key) => {
+    //get the value of cacheObj and FieldObj based on key
+    const subCacheObj = cacheObj[key];
+    const subFieldObj = fieldObj[key];
+    //if subCacheObj is an array, iterate through ele and trigger ObjectFilter
+    if (Array.isArray(subCacheObj)) {
+      result[key] = subCacheObj.map((obj) => {
+        return ObjectFilter(obj, subFieldObj);
+      });
+    } else if (typeof subCacheObj === 'object') {
+      result[key] = ObjectFilter(subCacheObj, subFieldObj);
+    }
+  });
+  return result;
+}
+
+/*helper function filters out object properties on current layer and invoke rescursive call if there are nested fields */
+const ObjectFilter = (cacheObj: any, fieldObj: any[]) => {
   let resultObj: any = {};
-  //iterate thorugh queryArr
-  queryArr.forEach((field) => {
-    //if ele is a string, get teh data
+  //iterate thorugh fieldObj
+  fieldObj.forEach((field) => {
+    //if cur field is a string, store the the properites to resultObj based on fields
     if (typeof field === 'string') {
-      resultObj[field] = jsonObj[field];
+      resultObj[field] = cacheObj[field];
     } else {
+      //if cur field is an object, invoke rescurive call on ObjectFilter based on value
       const fieldName = Object.keys(field)[0];
-      if (jsonObj[fieldName] === null) {
+      if (cacheObj[fieldName] === null) {
         resultObj[fieldName] = null;
-      } else if (Array.isArray(jsonObj[fieldName])) {
-        resultObj[fieldName] = jsonObj[fieldName].map((obj: any) => {
+      } else if (Array.isArray(cacheObj[fieldName])) {
+        resultObj[fieldName] = cacheObj[fieldName].map((obj: any) => {
           return ObjectFilter(obj, field[fieldName]);
         });
-      } else if (typeof jsonObj[fieldName] === 'object') {
+      } else if (typeof cacheObj[fieldName] === 'object') {
         resultObj[fieldName] = ObjectFilter(
-          jsonObj[fieldName],
+          cacheObj[fieldName],
           field[fieldName]
         );
       }
@@ -25,25 +48,6 @@ const ObjectFilter = (jsonObj: any, queryArr: any[]) => {
   return resultObj;
 };
 
-//parent function that checks if nesting is array or object and triggers aplicable helper
-//   v redis v
-function parseDataFromCache(jsonObj: any, queryObj: any) {
-  const result: any = {};
 
-  Object.keys(jsonObj).forEach((key) => {
-    //for every key in redis create a key of its key
-    const valueJsonObj = jsonObj[key];
-    const valueOfQueryObj = queryObj[key];
-    //check if value is a an array
-    if (Array.isArray(valueJsonObj)) {
-      result[key] = valueJsonObj.map((obj) => {
-        return ObjectFilter(obj, valueOfQueryObj);
-      });
-    } else if (typeof valueJsonObj === 'object') {
-      result[key] = ObjectFilter(valueJsonObj, valueOfQueryObj);
-    }
-  });
-  return result;
-}
 
 export { parseDataFromCache };

@@ -19,24 +19,11 @@ const updateRedisAfterMutation = (
     if (queriesToClear) {
       // if queries to clear exists, iterate over queries and delete them from redis.
       for (let i = 0; i < queriesToClear.length; i++) {
-        redisClient.del(queriesToClear[i], (error: any, res: any) => {
-          // Display result of the Redis subscriber clearing
-          if (res === 1) {
-            console.log('Deleted successfully');
-          } else {
-            console.log('Item to be cleared was not found in redis');
-          }
-        });
+        redisClient.del(queriesToClear[i]);
       }
     }
-    // After subscribers array is cleared, delete the subscribed key.
-    redisClient.del(`${keyToClear}`, (error: any, res: any) => {
-      if (res === 1) {
-        console.log('Deleted the Subscriber Key successfully');
-      } else {
-        console.log('Failed to delete the Subscriber Key');
-      }
-    });
+    // after subscribers array is cleared, delete the subscribed key.
+    redisClient.del(`${keyToClear}`);
   });
 };
 
