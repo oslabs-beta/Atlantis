@@ -1,0 +1,24 @@
+.about {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: auto;
+  position: relative;
+}
+.coins {
+  height: 80vh;
+  width: 80vw;
+  z-index: 1;
+
+  position: relative;
+}
+.overCoins {
+  justify-content: center;
+  text-align: center;
+  z-index: 2;
+  position: absolute;
+  height: 65vh;
+  width: 40vw;
+  /* padding-top: 175px; */
+}
