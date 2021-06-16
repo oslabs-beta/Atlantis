@@ -1,3 +1,0 @@
-Dive into Typescript
-
-READMeEupdated.

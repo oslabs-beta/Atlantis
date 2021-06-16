@@ -10,6 +10,7 @@ import {
 
 const atlantis =
   (redisClient: any, schema: any) => async (req: any, res: any, next: any) => {
+    const start = performance.now()
     // if there is no graphQL request, go to the next middleware
     if (!req.body) return next();
     const AST = parse(req.body.query);
@@ -58,6 +59,9 @@ const atlantis =
           );
           // failed to connect to redis during the GQL request
           if (!res.locals.graphQLResponse) return res.status(500).send({ "Error": "Failed to connect to Redis" });
+          const end = performance.now()
+          const dif = end - start
+          res.locals.dif = dif
           next();
           /* Redis had the root key cached */
         } else {
@@ -81,11 +85,15 @@ const atlantis =
 
             next();
           } else {
+            // CASE WHERE IN REDIS AND SUBSET
             // request was a subset of the cached query, so we can parse it to return the appropriate data
             res.locals.graphQLResponse = parseDataFromCache(
               redisValues["data"],
               restructuredQuery
             );
+            const end = performance.now()
+            const dif = end - start
+            res.locals.dif = dif
             next();
 
           }
@@ -104,7 +112,9 @@ const atlantis =
       );
       // failed to connect to redis during the GQL request
       if (!res.locals.graphQLResponse) return res.status(500).send({ "Error": "Failed to connect to Redis" });
-
+      const end = performance.now()
+      const dif = end - start
+      res.locals.dif = dif
       next();
     }
   };

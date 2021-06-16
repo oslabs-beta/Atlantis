@@ -1,0 +1,50 @@
+{
+  "name": "atlantis-cache-temp",
+  "version": "1.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib",
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "keywords": [
+    "graphQL",
+    "cache",
+    "server-side",
+    "redis",
+    "atlantis",
+    "caching",
+    "apollo",
+    "relay",
+    "graphQL tools",
+    "node redis",
+    "cache graphQL"
+  ],
+  "author": "SeeC Labs",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.3.2"
+  },
+  "contributors": [
+    {
+      "name": "Coral Fussman",
+      "url": "https://github.com/coralfussman"
+    },
+    {
+      "name": "Sett Hein",
+      "url": "https://github.com/settnaing199"
+    },
+    {
+      "name": "Erik Matevosyan",
+      "url": "https://github.com/erik-matevosyan"
+    },
+    {
+      "name": "Erik Rogel",
+      "url": "https://github.com/erikjrogel"
+    }
+  ],
+  "homepage": "https://findatlantis.io",
+  "dependencies": {
+    "graphql": "^15.5.0"
+  }
+}
