@@ -4,12 +4,9 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLInt,
-  GraphQLNonNull,
-  GraphQLInputObjectType,
 } from 'graphql';
 const db = require('../model');
-import fetch from 'node-fetch';
-import { Args } from 'type-graphql';
+
 
 const UserType: any = new GraphQLObjectType({
   name: 'Users',
@@ -81,7 +78,19 @@ const RootQueryType = new GraphQLObjectType({
     companies: {
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
-      resolve: async () => {
+      args: {
+        company_id: { type: GraphQLInt },
+      },
+      resolve: async (parent, args, context, info) => {
+        if(Object.keys(args).length !== 0){
+          const result = await db.query(
+            `SELECT * FROM company WHERE company_id = $1`,
+            [args.company_id]
+          );
+          console.log("RESULT", result.rows);
+          return result.rows;
+
+        }
         const result = await db.query(`SELECT * FROM company`);
         return result.rows;
       },
@@ -154,7 +163,6 @@ const mutation: any = new GraphQLObjectType({
         description: { type: GraphQLString },
       },
       resolve: async (parent, { name, description }) => {
-        console.log('parent is ', parent);
         const result = await db.query(
           'INSERT INTO public.company (name, description) VALUES ( $1, $2) RETURNING *',
           [name, description]
@@ -182,7 +190,6 @@ const mutation: any = new GraphQLObjectType({
         return result.rows[0];
       },
     },
-
     updateUser: {
       type: UserType,
       args: {
@@ -195,7 +202,7 @@ const mutation: any = new GraphQLObjectType({
           'UPDATE public.user SET name=$1, company_id=$2 WHERE user_id=$3 RETURNING *;',
           [name, company_id, user_id]
         );
-        console.log(result.rows[0]);
+        console.log("Return form DB",result.rows[0]);
         return result.rows[0];
       },
     },
