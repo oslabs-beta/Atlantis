@@ -25,7 +25,8 @@ app.use(express.static(path.join(__dirname, './views')));
 
 
 app.use('/atlantis', atlantis(redisClient, schema), async (req, res) => {
-  return res.status(202).json({ data: res.locals.graphQLResponse });
+  console.log('dif is', res.locals.dif);
+  return res.status(202).json({ data: res.locals.graphQLResponse, responseTime: res.locals.dif });
 });
 
 app.use('/graphql',
