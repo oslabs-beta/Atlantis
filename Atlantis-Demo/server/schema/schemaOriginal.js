@@ -4,8 +4,12 @@ const {
   GraphQLString,
   GraphQLList,
   GraphQLInt,
+  GraphQLID,
+  GraphQLNonNull,
+  GraphQLInputObjectType,
 } = require('graphql');
-const db = require('./../models.js');
+
+const db = require('../models.js');
 
 const UserType = new GraphQLObjectType({
   name: 'Users',
@@ -77,32 +81,26 @@ const RootQueryType = new GraphQLObjectType({
     companies: {
       type: new GraphQLList(CompanyType),
       description: 'list of companies',
-      args: {
-        company_id: { type: GraphQLInt },
-      },
       resolve: async (parent, args, context, info) => {
-        if (Object.keys(args).length !== 0) {
-          const result = await db.query(
-            `SELECT * FROM company WHERE company_id = $1`,
-            [args.company_id]
-          );
-          console.log('RESULT', result.rows);
-          return result.rows;
-        }
+        // console.log(info);
         const result = await db.query(`SELECT * FROM company`);
+
         return result.rows;
       },
     },
 
-    //users ruturn all usuers
+    //users ruturn all usuers at a company
     users: {
       type: new GraphQLList(UserType),
       description: 'list of users',
       args: {
         company_id: { type: GraphQLInt },
       },
-      resolve: async () => {
-        const result = await db.query('SELECT * FROM public.user');
+      resolve: async (parent, { company_id }) => {
+        const result = await db.query(
+          'SELECT * FROM public.user WHERE company_id = $1',
+          [company_id]
+        );
         return result.rows;
       },
     },
@@ -120,15 +118,17 @@ const RootQueryType = new GraphQLObjectType({
         return result.rows[0];
       },
     },
-    //projects return all projects
     projects: {
       type: new GraphQLList(ProjectType),
       description: 'list of projects',
       args: {
         company_id: { type: GraphQLInt },
       },
-      resolve: async () => {
-        const result = await db.query('SELECT * FROM public.project');
+      resolve: async (parent, { company_id }) => {
+        const result = await db.query(
+          'SELECT * FROM public.project where company_id = $1',
+          [company_id]
+        );
         return result.rows;
       },
     },
@@ -200,7 +200,7 @@ const mutation = new GraphQLObjectType({
           'UPDATE public.user SET name=$1, company_id=$2 WHERE user_id=$3 RETURNING *;',
           [name, company_id, user_id]
         );
-        console.log('Return form DB', result.rows[0]);
+        console.log(result.rows[0]);
         return result.rows[0];
       },
     },

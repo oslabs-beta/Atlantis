@@ -18,13 +18,13 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         exclude: /node_modules/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|jpg|gif)$/i,
         use: [
           {
-            loader: "url-loader",
+            loader: 'url-loader',
             options: {
               limit: 8192,
             },
@@ -35,13 +35,13 @@ module.exports = {
         test: /\.svg$/,
         use: [
           {
-            loader: "svg-url-loader",
+            loader: 'svg-url-loader',
             options: {
               limit: 10000,
             },
           },
         ],
-      }
+      },
     ],
   },
   entry: entry,
@@ -59,11 +59,10 @@ module.exports = {
     proxy: {
       '/auth/*': 'http://localhost:3000',
       '/api/*': 'http://localhost:3000',
-      '/cachetest/': 'http://localhost:3000',
+      '/cachetest': { target: 'http://localhost:3000', changeOrigin: true },
+      '/clearcache/': { target: 'http://localhost:3000', changeOrigin: true },
       '/eriktest/': 'http://localhost:3000',
-      '/accounts/sendnew': 'http://localhost:3000',
       '/graphql/': 'http://localhost:3000',
-      '/clearcache/': 'http://localhost:3000',
     },
     hot: true,
   },

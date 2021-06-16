@@ -1,19 +1,23 @@
-
 const express = require('express');
 const app = express();
 const path = require('path');
-require('dotenv').config()
+require('dotenv').config();
+const { clearCache } = require('./middleware');
+const { atlantis } = require('../atlantis-for-demo/index');
 
-
-const { graphqlHTTP } = require('express-graphql')
+const { graphqlHTTP } = require('express-graphql');
 const schema = require('./schema/schema.js');
 
-const {  parsingAlgo, checkRedis, makeGQLrequest, clearCache } = require('./middleware.js')
-
+const redis = require('redis');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const redisClient = redis.createClient({ host: 'localhost', port: 6379 });
+
+app.use('/cachetest/', atlantis(redisClient, schema), (req, res) => {
+  res.json({ data: res.locals.graphQLResponse, time: res.locals.dif });
+});
 
 app.use(
   '/graphql',
@@ -22,32 +26,23 @@ app.use(
     graphiql: true,
   })
 );
-  
+
 app.get('/clearcache/', clearCache, (req, res, next) => {
-  res.locals.placeholder = ''
-  res.send(res.locals.placeholder)
-})
-app.get('/eriktest/:query', (req, res, next) => {
-  console.log('got request', req.params)
-  res.send(req.params)
-})
-
-app.get('/cachetest/:query', parsingAlgo, checkRedis, makeGQLrequest, (req, res, next) => {
-  console.log('got request', req.params)
-  res.send(res.locals.graphQLResponse)
-})
-
+  res.locals.completed = 'cache cleared';
+  res.send(res.locals.completed);
+});
 
 // catch-all route handler for any requests to an unknown route
 app.get('*', (req, res) => {
-  console.log('catch all route hit')
-  res.status(200).sendFile(path.join(__dirname, '../client/public/index.html'))});
+  console.log('catch all route hit');
+  res.status(200).sendFile(path.join(__dirname, '../client/public/index.html'));
+});
 //app.use((req, res) => res.status(404).send('This is not the page you\'re looking for...'));
-  
-// global error debugger 
+
+// global error debugger
 app.use((err, req, res, next) => {
-  console.log('IN ERROR, req is,', req.params)
-  console.log('error is', err)
+  console.log('IN ERROR, req is,', req.params);
+  console.log('error is', err);
   const defaultErr = {
     log: 'Express error handler caught unknown middleware error',
     status: 500,
@@ -57,8 +52,6 @@ app.use((err, req, res, next) => {
   console.log(errorObj.log);
   return res.status(errorObj.status).json(errorObj.message);
 });
-
-
 
 app.listen(3000); //listens on port 3000 -> http://localhost:3000/
 

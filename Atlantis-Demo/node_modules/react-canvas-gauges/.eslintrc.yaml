@@ -1,8 +1,0 @@
----
-  extends:
-    - standard
-    - standard-react
-  parserOptions:
-    ecmaVersion: 6
-    ecmaFeatures:
-      jsx: true
