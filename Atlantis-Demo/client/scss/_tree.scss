@@ -1,0 +1,110 @@
+.tree-div{
+  min-height: 600px;
+
+}
+.tree{
+  z-index: -1;
+  margin: 1%;
+}
+
+div.custom-container {
+  text-align: center;
+  background-color: #242424;
+}
+
+svg.custom .node circle {
+  fill: $lightBlue;
+  stroke: #25b898;
+
+  size: 10px;
+}
+
+svg.custom .node text {
+  font-size: 20px;
+  background-color: rgb(95, 93, 93);
+  fill: #f4f4f4;
+  text-shadow: 0 2px 10px rgb(59, 58, 58);
+  transform: rotate(-90deg);
+  margin: 10px;
+}
+
+svg.custom .node {
+  cursor: pointer;
+}
+
+svg.custom path.link {
+  fill: none;
+  stroke: $lightBlue;
+  stroke-width: 6px;
+}
+
+
+// #body {
+//   width: 50%;
+//   margin: 0 auto;
+//   position: relative;
+// }
+
+// rect {
+//   fill: none;
+//   pointer-events: all;
+// }
+
+// pre {
+//   font-size: 22px;
+// }
+
+// line {
+//   stroke: #0e0;
+//   stroke-width: 5px;
+// }
+
+// .string,
+// .regexp {
+//   color: #f39;
+// }
+
+// .keyword {
+//   color: #00c;
+// }
+
+// .comment {
+//   color: #777;
+//   font-style: oblique;
+// }
+
+// .number {
+//   color: #369;
+// }
+
+// .class,
+// .special {
+//   color: #1181b8;
+// }
+
+// a:link,
+// a:visited {
+//   color: rgb(108, 206, 185);
+//   text-decoration: none;
+// }
+
+// a:hover {
+//   color: #666;
+// }
+
+// .node circle {
+//   cursor: pointer;
+//   fill: #fff;
+//   stroke: $mainBlue;
+//   stroke-width: 2px;
+// }
+
+// .node text {
+//   font-size: 18px;
+// }
+
+// path.link {
+//   fill: none;
+//   stroke: #ccc;
+//   stroke-width: 3px;
+// }

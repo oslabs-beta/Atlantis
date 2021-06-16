@@ -1,0 +1,112 @@
+nav {
+  margin-top: 10px;
+  margin: auto;
+  height: 40px;
+  align-items: right;
+  justify-content: center;
+  font-weight: 400;
+  z-index: 3;
+}
+
+// #info-header-container {
+//   display: flex;
+//   margin-bottom: 20px;
+// }
+
+// #info-header {
+//   width: 30%;
+//   margin: 10px auto;
+// }
+
+header {
+  padding-top: 1%;
+  width: 100vw;
+  border-bottom: 2px solid $mainGrey;
+  margin-bottom: 20px;
+  font-weight: normal;
+  letter-spacing: 7.2px;
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+}
+
+// #logo-main-container {
+//   display: flex;
+//   justify-content: center;
+// }
+
+// #logo-main {
+//   height: 60px;
+//   margin: 1%;
+// }
+
+.nav-links {
+  margin: auto;
+  left: 50%;
+  right: 50%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-around;
+  list-style-type: none;
+  margin-bottom: 2%;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: $mainBlue;
+}
+
+.nav-links li a:hover {
+  text-decoration: underline;
+  transform: scale(1.2);
+}
+
+.navLink {
+  // margin: 2px;
+  margin: 2%;
+  // margin-top: 30px;
+  padding: 5px;
+  color: rgba(249, 249, 249);
+  font-weight: 400;
+  font-size: 20px;
+  z-index: 4;
+}
+
+.tideHeader {
+  margin-bottom: 2%;
+  height: 65vh;
+  width: 100vw;
+  background-color: $mainBlue;
+  background: url(../assets/frequency_banner.svg) bottom center $mainBlue;
+  background-size: 100vw;
+}
+
+.headerMain {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+.left {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 50%;
+  color: white;
+  text-align: center;
+  justify-content: center;
+  h1 {
+    font-size: 90px;
+    margin-bottom: 0;
+  }
+  h3 {
+    margin: 0;
+  }
+}
+.right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 50%;
+  color: white;
+  text-align: center;
+  justify-content: center;
+}

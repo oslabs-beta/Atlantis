@@ -51,7 +51,7 @@ class Form extends Component {
             <input className="submitButton" type="submit" value="Submit"/>
             <h3>Or Authenticate with </h3>
             <a href="https://imgur.com/N4okLOv"><img src="https://i.imgur.com/N4okLOv.png" title="" /></a><br/>
-            {/* <img src={github} className="" alt="github"  /> */}
+
             <button onClick={this.props.handleLoginGithub}>GITHUB</button>
         </div>
       </form>
