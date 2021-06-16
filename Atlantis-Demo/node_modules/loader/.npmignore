@@ -1,9 +1,0 @@
-test/
-coverage.html
-lib-cov/
-*.min.*.js
-*.min.*.css
-example
-figures
-sources
-node_modules
