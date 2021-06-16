@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import QueryWindow from '../components/QueryWindow.js';
-import DropdownItem from '../components/DropdownItem.js';
+import QueryWindow from './QueryWindow.js';
+import DropDownItem from './DropDownItem.js';
 import { ResultsHelper } from '../helpers/HelperFunctions.js';
 import DropDown from '../assets/drop_dark.svg';
 import DropDownHover from '../assets/drop_light.svg';
@@ -14,8 +14,8 @@ import DropDownHover from '../assets/drop_light.svg';
 */
 
 const Query = (props) => {
-  console.log("Query State hit!")
-  
+  console.log('Query State hit!');
+
   const { queryInput, setQueryInput } = props;
 
   const [query, setQuery] = useState('Companies'); // set the kind of query you want
@@ -116,7 +116,7 @@ const Query = (props) => {
   // Creates dropdown menu from the above array
   const dropdownMenu = dropdownList.map((item, i) => {
     return (
-      <DropdownItem func={selectQuery} item={item} key={'QueryDropdown' + i} />
+      <DropDownItem func={selectQuery} item={item} key={'QueryDropdown' + i} />
     );
   });
 
@@ -124,7 +124,7 @@ const Query = (props) => {
   const idDropMenu = [];
   for (let i = 1; i <= 5; i++) {
     idDropMenu.push(
-      <DropdownItem func={selectDropdownId} item={i} key={'ID' + i} />
+      <DropDownItem func={selectDropdownId} item={i} key={'ID' + i} />
     );
   }
 

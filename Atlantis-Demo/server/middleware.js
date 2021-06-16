@@ -1,17 +1,17 @@
 const { graphql, visit, parse, BREAK } = require('graphql');
-const redis = require('redis')
-const middleware = {}
+const redis = require('redis');
+const middleware = {};
 
-const schema = require('./schema/schema')
+const schema = require('./schema/schema');
 
-const redisClient = redis.createClient({
-  host: 'localhost',
-  port: 6379,
-});
+// const redisClient = redis.createClient({
+//   host: 'localhost',
+//   port: 6379,
+// });
 
 middleware.parsingAlgo = (req, res, next) => {
   console.log(req.params.query);
-  const AST= parse(req.params.query);
+  const AST = parse(req.params.query);
   const { proto, protoArgs, operationType } = middleware.parseAST(AST);
   console.log(proto);
   console.log(protoArgs, 'protoargs is');
@@ -25,7 +25,7 @@ middleware.parsingAlgo = (req, res, next) => {
   console.log('proto to query', querymade);
   res.locals.querymade = querymade;
   next();
-}
+};
 
 middleware.parseAST = (AST) => {
   let isQuellable;
@@ -36,7 +36,7 @@ middleware.parseAST = (AST) => {
   let operationType;
 
   // initialiaze arguments as null
-  let protoArgs = null; 
+  let protoArgs = null;
 
   // initialize stack to keep track of depth first parsing
   const stack = [];
@@ -79,8 +79,8 @@ middleware.parseAST = (AST) => {
           // collect arguments if arguments contain id, otherwise make query unquellable
           // hint: can check for graphQl type ID instead of string 'id'
           for (let i = 0; i < node.arguments.length; i++) {
-            const key= node.arguments[i].name.value;
-            const value= node.arguments[i].value.value;
+            const key = node.arguments[i].name.value;
+            const value = node.arguments[i].value.value;
 
             // for queries cache can handle only id as argument
             if (operationType === 'query') {
@@ -102,9 +102,9 @@ middleware.parseAST = (AST) => {
     },
     SelectionSet(node, key, parent, path, ancestors) {
       /* Exclude SelectionSet nodes whose parents' are not of the kind
-      * 'Field' to exclude nodes that do not contain information about
-      *  queried fields.
-      */
+       * 'Field' to exclude nodes that do not contain information about
+       *  queried fields.
+       */
       if (parent.kind === 'Field') {
         // console.log(parent, "Parent Field")
         // loop through selections to collect fields
@@ -128,7 +128,6 @@ middleware.parseAST = (AST) => {
 
   return { proto, protoArgs, operationType };
 };
-
 
 // PARSE THE PROTO FROM AST INTO A QUERY AGAIN
 middleware.ProtoQueryString = (obj, protoArgs) => {
@@ -167,73 +166,70 @@ middleware.ProtoQueryString = (obj, protoArgs) => {
 
 // CHECK IF CACHE HOLDS THE DATA
 middleware.checkRedis = (req, res, next) => {
-  console.log('checking redis')
+  console.log('checking redis');
   if (res.locals.ismutation) return next();
   redisClient.get(res.locals.querymade, (error, values) => {
-  if (error) {
-    console.log('redis error', error);
-    res.send(error);
-  }
-  if (!values) {
-    console.log('query was not a key in redis session');
+    if (error) {
+      console.log('redis error', error);
+      res.send(error);
+    }
+    if (!values) {
+      console.log('query was not a key in redis session');
 
-    return next();
-  } else {
-    console.log('query was found in cache');
-    const redisValues = JSON.parse(`${values}`);
-    // console.log('redis Values are', redisValues);
-    res.locals.graphQLResponse = redisValues;
-    return next();
-  }
-});
-}
-
-
+      return next();
+    } else {
+      console.log('query was found in cache');
+      const redisValues = JSON.parse(`${values}`);
+      // console.log('redis Values are', redisValues);
+      res.locals.graphQLResponse = redisValues;
+      return next();
+    }
+  });
+};
 
 // MAKE THE ACTUAL REQUEST
 middleware.makeGQLrequest = (req, res, next) => {
   if (res.locals.graphQLResponse) return next();
   console.log('about to make GQL query of ', res.locals.querymade);
   graphql(schema, res.locals.querymade).then((response) => {
-  res.locals.graphQLResponse = response.data;
-  console.log('graphQL responded with', res.locals.graphQLResponse);
-  if (!res.locals.ismutation) {
-    const subscriptions = middleware.findAllTypes(response.data);
-    console.log('subscribed to ', subscriptions);
-    // subscribe the query to mutations of type Subscription
-    for (let key in subscriptions) {
-      redisClient.get(`${subscriptions[key]}`, (error, values) => {
-        if (error) {
-          console.log('redis error', error);
-          res.send(error);
-        }
-        // Case where this query is the first to subscribe to this type.
-        if (!values) {
-          const subs = [res.locals.querymade];
-          redisClient.set(subscriptions[key], JSON.stringify(subs));
-        } else {
-          // Case where other queries are also subscribed to changes of this type.
-          const subs = JSON.parse(`${values}`);
-          subs.push(res.locals.querymade);
-          redisClient.set(subscriptions[key], JSON.stringify(subs));
-        }
-      });
+    res.locals.graphQLResponse = response.data;
+    console.log('graphQL responded with', res.locals.graphQLResponse);
+    if (!res.locals.ismutation) {
+      const subscriptions = middleware.findAllTypes(response.data);
+      console.log('subscribed to ', subscriptions);
+      // subscribe the query to mutations of type Subscription
+      for (let key in subscriptions) {
+        redisClient.get(`${subscriptions[key]}`, (error, values) => {
+          if (error) {
+            console.log('redis error', error);
+            res.send(error);
+          }
+          // Case where this query is the first to subscribe to this type.
+          if (!values) {
+            const subs = [res.locals.querymade];
+            redisClient.set(subscriptions[key], JSON.stringify(subs));
+          } else {
+            // Case where other queries are also subscribed to changes of this type.
+            const subs = JSON.parse(`${values}`);
+            subs.push(res.locals.querymade);
+            redisClient.set(subscriptions[key], JSON.stringify(subs));
+          }
+        });
+      }
+      redisClient.setex(
+        res.locals.querymade,
+        600,
+        JSON.stringify(res.locals.graphQLResponse)
+      );
+    } else {
+      // mutation was made, need to clear all subscribers.
+      middleware.updateRedisAfterMutation(res.locals.graphQLResponse);
     }
-    redisClient.setex(
-      res.locals.querymade,
-      600,
-      JSON.stringify(res.locals.graphQLResponse)
-    );
-  } else {
-    // mutation was made, need to clear all subscribers.
-    middleware.updateRedisAfterMutation(res.locals.graphQLResponse);
-  }
-  next();
-});
-}
+    next();
+  });
+};
 
-
-middleware.findAllTypes = (GQLresponse, subs=[]) => {
+middleware.findAllTypes = (GQLresponse, subs = []) => {
   for (let key in GQLresponse) {
     if (Array.isArray(GQLresponse[key])) GQLresponse = { ...GQLresponse };
     if (key == '__typename') {
@@ -288,14 +284,4 @@ middleware.updateRedisAfterMutation = (graphQLResponse) => {
   });
 };
 
-
-middleware.clearCache = (req, res, next) => {
-  console.log('in middleware')
-  const log = () => {
-    console.log('Redis Cache Cleared')
-  }
-  redisClient.flushall('ASYNC', log)
-  return next();
-}
-
-module.exports = middleware
+module.exports = middleware;
