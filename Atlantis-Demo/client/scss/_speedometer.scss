@@ -1,0 +1,82 @@
+.speedometerContainer {
+  //   height: 20vh;
+  height: 40vh;
+  margin: 2%;
+  background: rgba(249, 249, 249, 0.075);
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 30px 30px 30px 30px;
+}
+.queryField {
+  //   height: 20vh;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  padding: 5%;
+}
+#meter {
+  display: flex;
+  flex-direction: row;
+
+  padding-bottom: 0;
+  margin: 0;
+}
+#speed {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  padding-right: 0;
+}
+canvas {
+  padding: 0;
+  margin: 0;
+}
+#window {
+  height: 300px;
+  width: 450px;
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 5%;
+  padding: 5%;
+}
+
+.metricDash {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#metric {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 200px;
+  width: 200px;
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 5%;
+  padding: 0;
+  margin: 1%;
+  h5 {
+    margin: 0%;
+  }
+}
+#metric:hover {
+  transform: scale(1.1);
+  transition: all 0.5s;
+  box-shadow: -2px -6px 15px #fff, 2px 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+#field {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  padding-left: 0;
+}
+.style {
+  animation: true;
+  animation-duration: 1000ms;
+}
