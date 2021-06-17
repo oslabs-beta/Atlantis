@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Speedometer from './Speedometer.js';
+import page_brk from '../assets/page_brk.svg'
 import persisted from '../assets/persisted.svg';
 import fast from '../assets/fast.svg';
 import QueryState from './QueryState.js';
 import Dial from './Dial.js';
+import Gauge from './Gauge.js';
 // input field that lets us query the route cache test.
 
 let start = 0;
@@ -28,15 +30,12 @@ function Dashboard() {
 
   let value;
 
-  function setPercent(val) {
-    if (value === 1) {
-      if (responseTime > 30) {
-        console.log(value, 'value is here');
-        return (value = 99.5);
-      }
+  function setPercent (value) {
+    if(responseTime > 30){
+      return value = 99.5
+    } else {
+      return 0
     }
-    value++;
-    return 0;
   }
 
   function sendQuery(queryInput) {
@@ -55,9 +54,9 @@ function Dashboard() {
     })
       .then((res) => res.json())
       .then((res) => {
-        console.log('res is ', res);
+        setResponseTime(res.time)
+        //console.log('res is ', res);
       })
-      .then(() => setResponseTime(res.time))
       .catch((e) => console.log(e));
   }
 
@@ -67,7 +66,8 @@ function Dashboard() {
 
   return (
     <>
-      <h2>Demo & Metrics</h2>
+     <img src={page_brk} />
+      <h1>Atlantis Metrics</h1>
       <div className="queryField">
         <div id="field">
           <h4>Make a Request to Cache your speed Gains</h4>
@@ -116,7 +116,8 @@ function Dashboard() {
         </div>
         <div id="speed">
           <div id="meter">
-            <Speedometer responseTime={responseTime} />
+            {/* <Speedometer responseTime={responseTime} /> */}
+            <Gauge responseTime={responseTime} />
             {/* <AccelDial id="dial3" value={this.state.agx} title="Acceleration X" /> */}
           </div>
           <div className="metricDash">

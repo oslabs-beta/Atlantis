@@ -1,9 +1,7 @@
-.tree-div{
+.tree-div {
   min-height: 600px;
-
 }
-.tree{
-  z-index: -1;
+.tree {
   margin: 1%;
 }
 
@@ -24,7 +22,7 @@ svg.custom .node text {
   background-color: rgb(95, 93, 93);
   fill: #f4f4f4;
   text-shadow: 0 2px 10px rgb(59, 58, 58);
-  transform: rotate(-90deg);
+  // transform: rotate(-90deg);
   margin: 10px;
 }
 
@@ -37,7 +35,6 @@ svg.custom path.link {
   stroke: $lightBlue;
   stroke-width: 6px;
 }
-
 
 // #body {
 //   width: 50%;

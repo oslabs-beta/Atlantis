@@ -7,7 +7,7 @@ export default function TeamContainer() {
     return (
         <>
         <img src={page_brk} />
-            <h2>Developers</h2>
+            <h1>Developing Staff</h1>
         <div id="team-container">
             <Team />
             <TeamSocials />

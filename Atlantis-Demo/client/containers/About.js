@@ -1,8 +1,8 @@
 import React from 'react';
-import page_brk from '../assets/page_brk.svg'
+
 import atlantis_QL from '../assets/atlantis_QL.svg'
-
-
+import space_saving from '../assets/space_saving.svg'
+import server_light from '../assets/servers_light.svg'
 function About() {
   // const text = `Atlantis is a light-weight library that leverages Redis 
   //               key-value store to dynamically cache GraphQL queries as responses. \n
@@ -21,7 +21,7 @@ function About() {
         
 
            <div className="about-left">
-               <h2>Atlantis is a light-weight library that solves the issue of storing and maintaining deeply-nested queries</h2>
+               <h2>Atlantis is a light-weight library that solves the issue of storing and maintaining deeply-nested GraphQL queries</h2>
                <p>Ensuring the client always receives the most relevant data as mutations are made to the database. </p>
            
            </div>
@@ -35,19 +35,36 @@ function About() {
    
         
 
-   <div className="redis-left">
-     
-       <img src="https://media.giphy.com/media/rok0zBiCcCMrMFvS9x/giphy.gif" width="300"/>
-   </div>
-   <div className="redis-right">
-   <h2>Queries that are more shallow and within the scope of previous queries 
-                are pulled directly from the cache,  offering further flexibility and 
-                precision, without additional database requests or overriding previous key-values.</h2>
+    <div className="redis-left">
+        
+      <h1>Saving Time</h1>
+          <img src="https://media.giphy.com/media/rok0zBiCcCMrMFvS9x/giphy.gif" width="300"/>
+      </div>
+      <div className="redis-right">
+      <h2>Atlantis leverages Redis's 'in-memory' quick lookup time
+              to rapidly serve up cached graphQL responses regardless of size or structure.</h2>
+      <img src={server_light} className='server'/>
+      <p>Redis integration along with Pub/Sub architecture also allows for
+         scaling as your needs grow and you require more cache space or backup cache workers</p>
+      </div>
       
-  
-   </div>
-  
-</div>
+    </div>
+  <div className="about-container">
+    
+          
+
+      <div className="server-left">
+      <h2>New queries that bare resemblance to previous queries, are intelligently pulled from the existing
+         cached nesting instead of creating a new key/value entry </h2>
+        
+      </div>
+      <div className="server-right">
+      <h1>Saving Space</h1>
+          <img src={space_saving} />
+      </div>
+    
+  </div>
+      
     
             {/* s */}
             {/* <p> Queries that are more shallow and within the scope of previous queries 
@@ -57,7 +74,7 @@ function About() {
               to dynamically cache GraphQL queries as responses.</p> */}
              
        
-        <img src={page_brk} />
+       
        
     </>
   );

@@ -32,6 +32,8 @@ function MainContainer() {
      
        
         <About />
+        <h1>LET'S TAKE A LOOK UNDER THE HOOD</h1>
+        <h2>Click Below to see the data flow</h2>
         
         <ExpandTree />
         <Dashboard className="queryField"/>

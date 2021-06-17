@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QueryWindow from '../components/QueryWindow.js';
-import DropdownItem from '../components/DropdownItem.js';
+import DropDownItem from '../components/DropDownItem.js';
 import { ResultsHelper } from '../helpers/HelperFunctions.js';
 import DropDown from '../assets/drop_dark.svg';
 import DropDownHover from '../assets/drop_light.svg';
@@ -64,7 +64,7 @@ const Query = (props) => {
     setQueryInput(newOutput);
   };
 
-  // Change Query Selection - fires from DropdownItem child - comes in like ('Countries')
+  // Change Query Selection - fires from DropDownItem child - comes in like ('Countries')
   const selectQuery = (selection) => {
     setQuery(selection);
     if (selection === 'companies' || selection === 'country by id') {
@@ -116,7 +116,7 @@ const Query = (props) => {
   // Creates dropdown menu from the above array
   const dropdownMenu = dropdownList.map((item, i) => {
     return (
-      <DropdownItem func={selectQuery} item={item} key={'QueryDropdown' + i} />
+      <DropDownItem func={selectQuery} item={item} key={'QueryDropdown' + i} />
     );
   });
 
@@ -124,7 +124,7 @@ const Query = (props) => {
   const idDropMenu = [];
   for (let i = 1; i <= 5; i++) {
     idDropMenu.push(
-      <DropdownItem func={selectDropdownId} item={i} key={'ID' + i} />
+      <DropDownItem func={selectDropdownId} item={i} key={'ID' + i} />
     );
   }
 
