@@ -1,6 +1,8 @@
 <div  align="center">
 <img src="https://github.com/settnaing199/npm-package-test/blob/main/Screen%20Shot%202021-06-15%20at%202.36.35%20PM.png" width="300px" align="center"/>
   <h1>Atlantis-Cache</h1>
+  <p>Light-weight server-side caching solution for GraphQL</p>
+  <a href=""><img alt="GitHub license" src=""></a>
 
 </div>
 
