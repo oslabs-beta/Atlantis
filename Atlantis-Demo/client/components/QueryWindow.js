@@ -144,7 +144,6 @@ const QueryWindow = (props) => {
   const queriedItems = queryList.map((item, i) => {
     // If querying "users", need to open up a new pair of brackets and recursively call TypeFields to generate users fields
     if (item === 'users') {
-      console.log('userfields', usersFields);
       return (
         <div key={i}>
           <div className="queryLine">

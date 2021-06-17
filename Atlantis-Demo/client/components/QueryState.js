@@ -58,7 +58,6 @@ const QueryState = (props) => {
   */
   const outputFunction = (newList, sub, query, id) => {
     const newOutput = ResultsHelper(newList, sub, query, id, queryInput);
-    console.log('NEW OUT PUT', newOutput);
     setQueryInput(newOutput);
   };
 

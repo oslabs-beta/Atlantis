@@ -55,7 +55,7 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
 
       // if new list has it but we don't, we're adding it with the default initial values
       if (alreadyHaveUsers === false && newListHasUsers === true) {
-        currentList.push({ users: ['id'] });
+        currentList.push({ users: ['user_id'] });
       }
 
       currentResults[arr] = currentList; // if no users, this doesn't get altered

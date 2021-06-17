@@ -11,8 +11,6 @@ import PlusHover from '../assets/plus_dark.svg';
 */
 
 const UsersFields = (props) => {
-  console.log(props, 'userFields ');
-
   const { usersFields, type, outputFunction, modifyUsersFields } = props; // import props
 
   const [queryList, setQueryList] = useState(usersFields);
@@ -87,9 +85,7 @@ const UsersFields = (props) => {
 
   //======= Plus button ========//
   function addItem(item) {
-    console.log('ADD ITEM HIT!');
     modifyUsersFields(item, 'add');
-    console.log('item git', item);
     // add item to queryList
     const newList = [...queryList];
     newList.push(item);
