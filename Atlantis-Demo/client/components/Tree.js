@@ -138,8 +138,8 @@ export default function App() {
       <Tree
         className="tree"
         data={data}
-        height={200}
-        width={600}
+        height={600}
+        width={1300}
         margins={{ top: 20, bottom: 10, left: 20, right: 200 }}
         gProps={{
           onClick: clickHandler,
@@ -150,7 +150,7 @@ export default function App() {
         animated
         svgProps={{
           className: "custom",
-          transform: 'rotate(90)'
+          // transform: 'rotate(90)'
         }}
       />
     </div>

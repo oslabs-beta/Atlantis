@@ -61,16 +61,19 @@ const Query = (props) => {
   const outputFunction = (newList, sub, query, id) => {
     console.log(query, 'here is query!');
     const newOutput = ResultsHelper(newList, sub, query, id, queryInput);
+    console.log('new ouptut is ', newOutput)
     setQueryInput(newOutput);
   };
 
-  // Change Query Selection - fires from DropdownItem child - comes in like ('Countries')
+  // Change Query Selection - fires from DropDownItem child - comes in like ('Countries')
   const selectQuery = (selection) => {
+    console.log('inside query state, about to setstates')
     setQuery(selection);
     if (selection === 'companies' || selection === 'country by id') {
       setType('Company');
     }
     if (selection === 'users' || selection === 'cities by country id') {
+      console.log('users is geting selected')
       setType('User');
     }
     if (selection === 'country by id' || selection === 'cities by country id') {

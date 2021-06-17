@@ -6,7 +6,7 @@ import { timeMillisecond } from "d3";
 
 
 const Dial = ({
-  value = 0,
+  value,
   min = 0,
   max = 100,
   label,
@@ -14,8 +14,39 @@ const Dial = ({
   responseTime,
   setPercent
 }) => {
-  console.log(value, 'here is value in dial');
- 
+  console.log(value, 'here is respone time');
+  // const [ coords, setCoords ] = useState(0);
+
+  // set state to invoke getCoords
+
+  //  || state to boolen, triggered or not triggered, if 
+  //if runtime > 30s, not cached yet, else, it has been cached and can set to true
+  // if state false, then ! getcoords on arc
+  // once setPercent invoked and changed to 99.5
+  // it will invoke State since conditional will be true
+  // and true invokes getCoordsOnArc
+
+  
+  
+  // console.log(newVal, 'newVal is here 1'); // undef
+  // const newVal = setPercent(value)  //99.5 
+
+  // let triggered;
+
+  // console.log(triggered,' here is triggered 1'); 
+  // if (newVal === 99.5) {
+
+  //   if (triggered) {
+  //     console.log('entered coords');
+      
+  //   }
+
+  //   console.log('here is market');
+  //   triggered = true;
+  // }
+  // console.log(triggered,' here is triggered'); 
+
+  // console.log(newVal, 'newVal is here 2'); // 0, 99.5
   const backgroundArc = arc()
     .innerRadius(0.65)
     .outerRadius(1)

@@ -2,12 +2,14 @@
   justify-content: center;
   align-content: center;
   align-items: center;
+  margin-top: 10vh;
   // width: 30px;
 }
 .arrowButton {
   border: 0px;
   align-items: center;
   background: white;
+
   // width: 30px;
 }
 
@@ -18,7 +20,7 @@
   opacity: 0.7;
 }
 .arrow {
-  padding-top: 2px;
+  padding-top: 10%;
 }
 .arrow:before {
   content: '';

@@ -45,7 +45,7 @@
   }
   img {
     align-self: center;
-    width: 70%;
+    width: 60%;
   }
 }
 
@@ -58,7 +58,7 @@
   text-align: center;
   justify-content: center;
   h1 {
-    font-size: 90px;
+    font-size: 75px;
     margin-bottom: 0;
   }
 
@@ -79,4 +79,39 @@
   h3 {
     margin: 0;
   }
+}
+
+.server-left {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 50%;
+  color: $mainBlue;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  h2 {
+    margin: 0;
+  }
+}
+.server-right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 50%;
+  color: $mainBlue;
+  text-align: center;
+  justify-content: center;
+  padding: 2%;
+  h1 {
+    font-size: 75px;
+    margin-bottom: 0;
+  }
+  h3 {
+    margin: 0;
+  }
+}
+.server {
+  align-self: center;
+  width: 15%;
 }
