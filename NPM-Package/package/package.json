@@ -1,7 +1,7 @@
 {
   "name": "atlantis-cache",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.5",
+  "description": "Server-side caching solution for graphQL",
   "main": "lib/index.js",
   "types": "lib",
   "scripts": {
@@ -21,7 +21,7 @@
     "cache graphQL"
   ],
   "author": "SeeC Labs",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^4.3.2"
   },

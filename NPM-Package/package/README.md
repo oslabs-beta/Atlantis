@@ -1,11 +1,11 @@
 <div  align="center">
+<img src="https://github.com/settnaing199/npm-package-test/blob/main/atlantis.jpeg" width="400px" align="center"/>
 <h1>Atlantis-Cache</h1>
-<img src="https://github.com/settnaing199/npm-package-test/blob/main/Screen%20Shot%202021-06-15%20at%202.36.35%20PM.png" width="300px" align="center"/>
 </div>
 
 ## About
 
-Atlantis is a light-weight library that leverages Redis key-value store to dynamically cache GraphQL queries as responses. Atlantis is able to dynamically store deeply-nested queries and maintain the most recent and relevant data as mutations are made to the database. Queries that are more shallow and within the scope of previous queries are pulled directly from the cache, offering further flexibility and precision, without additional network requests or overriding previous key-values.
+Atlantis is a light-weight library that leverages a Redis key-value store to dynamically cache GraphQL queries as responses. Atlantis is able to dynamically store deeply-nested queries and maintain the most recent and relevant data as mutations are made to the database. Queries that are more shallow and within the scope of previous queries are pulled directly from the cache, offering further flexibility and precision, without additional network requests or overriding previous key-values.
 
 ## Getting Started
 
@@ -20,7 +20,7 @@ This package is meant to work in conjunction with redis. To install redis:
   - Test if redis server is running: `redis-cli ping`. If it replies “PONG”, then it’s good to go!
   - Default port is `6379` (Keep note of the port)
 
-- Linux or non-Homebrew:
+- Linux or Window:
   - Download appropriate version of Redis from [redis.io/download](redis.io/download)
   - Follow the instructions
   - Once installation is completed, start redis server with `redis-server`
@@ -64,4 +64,4 @@ app.use('/graphql', atlantis(redisClient, schema), async (req, res) => {
 
 ### Notes:
 
-if you want to use graphQL, you can use a different endpoint for atlantis requests in devlopment. ie. app.use('/atlantis', atlants ..)
+if you want to use graphiQL (graphQL IDE), you can use a different endpoint for atlantis requests in devlopment. ie. app.use('/atlantis', atlants ..) as the middleware for all your queries. Then, app.use('/graphql',) for your graphQLHTTP import.

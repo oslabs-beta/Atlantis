@@ -1,12 +1,18 @@
 <div  align="center">
+<<<<<<< HEAD
 <img src="https://imgur.com/MNeHJ9y" width="300px" align="center"/>
   <h1>Atlantis Cache</h1>
+=======
+<img src="https://github.com/settnaing199/npm-package-test/blob/main/atlantis.jpeg" width="500px" align="center"/>
+  <h1>Atlantis-Cache</h1>
+>>>>>>> 3f6707a37f4f8b6ae40f6170d06598dfc00f2947
   <p>Light-weight server-side caching solution for GraphQL.</p>
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
  <a href="https://www.npmjs.com/package/atlantis-cache"> <img alt="npm" src="https://img.shields.io/npm/v/atlantis-cache"></a>
 <a href="https://github.com/oslabs-beta/Atlantis/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/oslabs-beta/Atlantis"></a>
 
 </div>
+
 
 ## About
 
