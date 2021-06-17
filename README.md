@@ -4,7 +4,6 @@
   <p>Light-weight server-side caching solution for GraphQL</p>
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
 
-
 </div>
 
 ## About
