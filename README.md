@@ -1,6 +1,6 @@
 <div  align="center">
 
-<img src="https://github.com/oslabs-beta/Atlantis/blob/master/Readme_banner.png" width="700px" align="center"/>
+<img src="https://github.com/oslabs-beta/Atlantis/blob/master/Readme_banner.png" width="800px" align="center"/>
 
   <h1>Atlantis-Cache</h1>
 
