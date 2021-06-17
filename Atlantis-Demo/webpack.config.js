@@ -52,7 +52,7 @@ module.exports = {
     publicPath: '/',
   },
   devServer: {
-    host: '0.0.0.0',
+    // host: '0.0.0.0',
     contentBase: [
       path.resolve(__dirname, '/build'),
       path.resolve(__dirname + '/client/public'),

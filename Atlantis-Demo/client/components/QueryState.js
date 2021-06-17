@@ -13,7 +13,7 @@ import DropDownHover from '../assets/drop_light.svg';
       - TypeField
 */
 
-const Query = (props) => {
+const QueryState = (props) => {
   console.log('Query State hit!');
 
   const { queryInput, setQueryInput } = props;
@@ -63,6 +63,7 @@ const Query = (props) => {
     const newOutput = ResultsHelper(newList, sub, query, id, queryInput);
     console.log('new ouptut is ', newOutput)
     setQueryInput(newOutput);
+    console.log("new state", queryInput)
   };
 
   // Change Query Selection - fires from DropDownItem child - comes in like ('Countries')
@@ -210,4 +211,4 @@ const Query = (props) => {
   );
 };
 
-export default Query;
+export default QueryState;
