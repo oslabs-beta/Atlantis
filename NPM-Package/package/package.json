@@ -1,6 +1,6 @@
 {
-  "name": "atlantis-cache-temp",
-  "version": "1.0.1",
+  "name": "atlantis-cache",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "types": "lib",
