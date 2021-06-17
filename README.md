@@ -68,6 +68,7 @@ app.use('/graphql', atlantis(redisClient, schema), async (req, res) => {
 - Erik Matevosyan - [Github](https://github.com/erik-matevosyan) | [Linkedin](https://www.linkedin.com/in/erik-matevosyan/)
 - Erik Rogel - [Github](https://github.com/erikjrogel) | [Linkedin](https://www.linkedin.com/in/erikjrogel/)
 
-### Notes:
+## License
 
-if you want to use graphQL, you can use a different endpoint for atlantis requests in devlopment. ie. app.use('/atlantis', atlants ..)
+This product is licensed under the MIT License - see the LICENSE.md file for details.‌
+This product is accelerated by OS Labs.
