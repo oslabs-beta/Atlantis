@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { arc } from "d3-shape";
-import { scaleLinear } from "d3-scale";
-import { format } from "d3-format";
-import { timeMillisecond } from "d3";
-
+import React, { useState } from 'react';
+import { arc } from 'd3-shape';
+import { scaleLinear } from 'd3-scale';
+import { format } from 'd3-format';
+import { timeMillisecond } from 'd3';
 
 const Dial = ({
   value = 0,
@@ -12,10 +11,20 @@ const Dial = ({
   label,
   units = timeMillisecond,
   responseTime,
-  setPercent
+  setPercent,
+  isCached,
 }) => {
   console.log(value, 'here is value in dial');
- 
+  const [cached, setCached] = useState(isCached);
+
+  const onChange = (value) => {
+    if (isCached === true) {
+      setCached(!isCached);
+      return setPercent(value);
+    }
+  };
+  console.log(value, 'here is value in dial2');
+
   const backgroundArc = arc()
     .innerRadius(0.65)
     .outerRadius(1)
@@ -42,23 +51,22 @@ const Dial = ({
 
   const colorScale = scaleLinear()
     .domain([0, 1, 2, 3])
-    .range(["#9B554E", "#67EFE5", "#A6FFF8", "#A6FFF8"]);
+    .range(['#9B554E', '#67EFE5', '#A6FFF8', '#A6FFF8']);
 
   const gradientSteps = colorScale.ticks(10).map((value) => colorScale(value));
 
   const markerLocation = getCoordsOnArc(angle, 1 - (1 - 0.65) / 2);
- 
 
   return (
     <div
       style={{
-        textAlign: "center"
+        textAlign: 'center',
       }}
     >
       <svg
-        style={{ overflow: "visible" }}
+        style={{ overflow: 'visible' }}
         width="9em"
-        viewBox={[-1, -1, 2, 1].join(" ")}
+        viewBox={[-1, -1, 2, 1].join(' ')}
       >
         <defs>
           <linearGradient
@@ -98,24 +106,26 @@ const Dial = ({
 
       <div
         style={{
-          marginTop: "0.4em",
-          fontSize: "2em",
-          lineHeight: "1em",
-          fontWeight: "900",
-          fontFeatureSettings: "'zero', 'tnum' 1"
+          marginTop: '0.4em',
+          fontSize: '2em',
+          lineHeight: '1em',
+          fontWeight: '900',
+          fontFeatureSettings: "'zero', 'tnum' 1",
         }}
       >
-        {format(",")(value)}
+        {format(',')(() => {
+          onChange(value);
+        })}
       </div>
 
       {!!label && (
         <div
           style={{
-            color: "#8b8ba7",
-            marginTop: "0.6em",
-            fontSize: "1.3em",
-            lineHeight: "1.3em",
-            fontWeight: "700"
+            color: '#8b8ba7',
+            marginTop: '0.6em',
+            fontSize: '1.3em',
+            lineHeight: '1.3em',
+            fontWeight: '700',
           }}
         >
           {label}
@@ -125,9 +135,9 @@ const Dial = ({
       {!!units && (
         <div
           style={{
-            color: "#8b8ba7",
-            lineHeight: "1.3em",
-            fontWeight: "300"
+            color: '#8b8ba7',
+            lineHeight: '1.3em',
+            fontWeight: '300',
           }}
         >
           {units}
@@ -137,11 +147,9 @@ const Dial = ({
   );
 };
 
-
 const getCoordsOnArc = (angle, offset = 10) => [
   Math.cos(angle - Math.PI / 2) * offset,
-  Math.sin(angle - Math.PI / 2) * offset
+  Math.sin(angle - Math.PI / 2) * offset,
 ];
-
 
 export default Dial;
