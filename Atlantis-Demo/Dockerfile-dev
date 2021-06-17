@@ -1,4 +1,4 @@
-FROM node:10.15
+FROM node:16.3
 RUN npm install -g webpack
 WORKDIR '/usr/src/app'
 COPY package*.json ./
