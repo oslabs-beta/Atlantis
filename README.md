@@ -13,11 +13,11 @@
 
 Atlantis is a light-weight library that leverages Redis key-value store to dynamically cache GraphQL queries as responses. Atlantis is able to dynamically store deeply-nested queries and maintain the most recent and relevant data as mutations are made to the database. Queries that are more shallow and within the scope of previous queries are pulled directly from the cache, offering further flexibility and precision, without additional network requests or overriding previous key-values.
 
+This package is meant to work in conjunction with redis. For more information about Redis: check out: <a href ="https://redis.io/">redis</a>
+
 ## Getting Started
 
 ### 1. Installing and Connecting to a Redis Server
-
-This package is meant to work in conjunction with redis. To install redis:
 
 - Mac-HomeBrew:
 
