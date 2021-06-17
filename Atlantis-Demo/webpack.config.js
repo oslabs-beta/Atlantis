@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const entry = path.resolve(__dirname, './client/index.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -51,14 +52,13 @@ module.exports = {
     publicPath: '/',
   },
   devServer: {
+    host: '0.0.0.0',
     contentBase: [
       path.resolve(__dirname, '/build'),
       path.resolve(__dirname + '/client/public'),
     ],
     historyApiFallback: true,
     proxy: {
-      '/auth/*': 'http://localhost:3000',
-      '/api/*': 'http://localhost:3000',
       '/cachetest': { target: 'http://localhost:3000', changeOrigin: true },
       '/clearcache/': { target: 'http://localhost:3000', changeOrigin: true },
       '/eriktest/': 'http://localhost:3000',
@@ -66,7 +66,7 @@ module.exports = {
     },
     hot: true,
   },
-  mode: process.env.NODE_ENV,
+  mode: 'development',
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'client', 'public', 'index.html'),

@@ -4,7 +4,7 @@ import GaugeChart from "react-gauge-chart";
 const styles = {
   dial: {
     display: "inline-block",
-    width: `500%`,
+    width: `90%`,
     height: `auto`,
     color: "#000",
     border: "0.5px solid #fff",

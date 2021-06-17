@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import QueryWindow from '../components/QueryWindow.js';
-import DropDownItem from '../components/DropDownItem.js';
+import QueryWindow from './QueryWindow.js';
+import DropDownItem from './DropDownItem.js';
 import { ResultsHelper } from '../helpers/HelperFunctions.js';
 import DropDown from '../assets/drop_dark.svg';
 import DropDownHover from '../assets/drop_light.svg';
@@ -14,8 +14,8 @@ import DropDownHover from '../assets/drop_light.svg';
 */
 
 const Query = (props) => {
-  console.log("Query State hit!")
-  
+  console.log('Query State hit!');
+
   const { queryInput, setQueryInput } = props;
 
   const [query, setQuery] = useState('Companies'); // set the kind of query you want
@@ -61,16 +61,19 @@ const Query = (props) => {
   const outputFunction = (newList, sub, query, id) => {
     console.log(query, 'here is query!');
     const newOutput = ResultsHelper(newList, sub, query, id, queryInput);
+    console.log('new ouptut is ', newOutput)
     setQueryInput(newOutput);
   };
 
   // Change Query Selection - fires from DropDownItem child - comes in like ('Countries')
   const selectQuery = (selection) => {
+    console.log('inside query state, about to setstates')
     setQuery(selection);
     if (selection === 'companies' || selection === 'country by id') {
       setType('Company');
     }
     if (selection === 'users' || selection === 'cities by country id') {
+      console.log('users is geting selected')
       setType('User');
     }
     if (selection === 'country by id' || selection === 'cities by country id') {
