@@ -1,5 +1,5 @@
 <div  align="center">
-<img src="https://github.com/settnaing199/npm-package-test/blob/main/atlantis.jpeg" width="500px" align="center"/>
+<img src="https://github.com/settnaing199/npm-package-test/blob/main/atlantis.jpeg" width="400px" align="center"/>
   <h1>Atlantis-Cache</h1>
   <p>Light-weight server-side caching solution for GraphQL.</p>
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
