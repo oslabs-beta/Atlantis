@@ -3,7 +3,7 @@
   <h1>Atlantis-Cache</h1>
   <p>Light-weight server-side caching solution for GraphQL</p>
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
-<a href="https://github.com/oslabs-beta/Atlantis/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/oslabs-beta/Atlantis"></a>
+<a href="https://github.com/oslabs-beta/Atlantiss/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/oslabs-beta/Atlantis"></a>
 
 </div>
 
