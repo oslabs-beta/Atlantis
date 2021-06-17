@@ -7,7 +7,7 @@ import PlusHover from '../assets/plus_dark.svg';
 const QueryWindow = (props) => {
   const { type, outputFunction } = props; // import props
 
-  const [queryList, setQueryList] = useState(['id']);
+  const [queryList, setQueryList] = useState(['company_id']);
   const [availableList, setAvailableList] = useState([]);
   const [plusDropdown, togglePlusDropdown] = useState(false);
   const [usersFields, setUsersFields] = useState(['id']);

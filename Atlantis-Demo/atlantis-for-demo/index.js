@@ -121,9 +121,12 @@ const atlantis = (redisClient, schema) => (req, res, next) =>
                 return res
                   .status(500)
                   .send({ Error: 'Failed to connect to Redis' });
+              const end = performance.now();
+              const dif = end - start;
+              res.locals.dif = dif;
               next();
             } else {
-              // CASE WHERE IN REDIS AND SUBSET
+              // CASE WHERE IN REDIS AND SUBSETL
               // request was a subset of the cached query, so we can parse it to return the appropriate data
               res.locals.graphQLResponse = exportHelper_1.parseDataFromCache(
                 redisValues['data'],

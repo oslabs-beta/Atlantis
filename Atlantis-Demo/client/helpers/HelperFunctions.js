@@ -1,10 +1,10 @@
  
 /**
  * @param {Array} newList - Array of query fields
- * @param {Array} sub - Array of query fields in the sub-query (aka "cities" in "countries")
- * @param {string} query - the query name for ex: "countries" or "cities"
+ * @param {Array} sub - Array of query fields in the sub-query (aka "users" in "companies")
+ * @param {string} query - the query name for ex: "companies" or "users"
  * @param {string} id - a number when querying by id
- * @param {Object} currentResults - the last output of the function - looks like { countries: ['id', 'name', {'cities': ['id', 'name']}] }
+ * @param {Object} currentResults - the last output of the function - looks like { companies: ['id', 'name', {'users': ['id', 'name']}] }
  */
 
 /* 
@@ -14,7 +14,7 @@
     - whatever is passed in here are the main array fields
     - looks like: ['name', 'id', 'capital']
   sub 
-    - whatever is passed in here are the sub-array (cities) fields
+    - whatever is passed in here are the sub-array (users) fields
     - looks like: ['name', 'population', 'country_id']
   query
     - argument is passed here when changing query
@@ -22,11 +22,11 @@
     - argument is passed here when changing query (only on "query by id")
   currentResults 
     - comes from the state
-    - looks like: { QUERY: ['item1', 'item2', {'cities': ['item1', 'item2']}] }
+    - looks like: { QUERY: ['item1', 'item2', {'users': ['item1', 'item2']}] }
 */
 
 const ResultsHelper = (newList, sub, query, id, currentResults) => {
-
+console.log("newList, sub, query, id, current", newList, sub, query, id, currentResults)
   for (let arr in currentResults) {
     //===========================//
     //===Alters the main array===//
@@ -35,39 +35,39 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
     if (newList) {
       const currentList = currentResults[arr];
 
-      // determine whether we already have cities
-      let alreadyHaveCities = false;
+      // determine whether we already have users
+      let alreadyHaveUsers = false;
       currentList.forEach((el) => {
-        if (typeof el === 'object') alreadyHaveCities = true;
+        if (typeof el === 'object') alreadyHaveUsers = true;
       });
 
       // determine whether newList has it
-      let newListHasCities = false;
+      let newListHasUsers = false;
       newList.forEach((el) => {
-        if (el === 'cities') newListHasCities = true;
+        if (el === 'users') newListHasUsers = true;
       });
 
       // if we already have it but new list doesn't, we're deleting it
-      if (alreadyHaveCities === true && newListHasCities === false) {
+      if (alreadyHaveUsers === true && newListHasUsers === false) {
         currentList.forEach((el, i) => {
           if (typeof el === 'object') currentList.splice(i, 1);
         });
       }
 
       // if new list has it but we don't, we're adding it with the default initial values
-      if (alreadyHaveCities === false && newListHasCities === true) {
-        currentList.push({ cities: ['id'] });
+      if (alreadyHaveUsers === false && newListHasUsers === true) {
+        currentList.push({ users: ['id'] });
       }
 
-      currentResults[arr] = currentList; // if no cities, this doesn't get altered
+      currentResults[arr] = currentList; // if no users, this doesn't get altered
 
-      // if we are NOT DEALING WITH CITIES AT ALL
-      if (alreadyHaveCities === false && newListHasCities === false) {
+      // if we are NOT DEALING WITH users AT ALL
+      if (alreadyHaveUsers === false && newListHasUsers === false) {
         currentResults[arr] = newList;
       }
 
-      // if we need to simply preserve cities as it is
-      if (alreadyHaveCities === true && newListHasCities === true) {
+      // if we need to simply preserve users as it is
+      if (alreadyHaveUsers === true && newListHasUsers === true) {
         let storeCityObject;
         currentList.forEach((el) => {
           if (typeof el === 'object') storeCityObject = el;
@@ -75,7 +75,7 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
 
         // loop through newList and
         const finalList = newList.map((el) => {
-          if (el === 'cities') {
+          if (el === 'users') {
             return storeCityObject;
           }
           return el;
@@ -105,15 +105,15 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
 
     if (query) {
       let fields;
-      if (query === 'country by id') {
-        query = 'country (id:1)';
+      if (query === 'company by id') {
+        query = 'company (id:1)';
         fields = currentResults[arr];
       }
-      if (query === 'cities by country id') {
-        query = 'citiesByCountry (country_id:1)';
+      if (query === 'users by company id') {
+        query = 'usersByCompany (company_id:1)';
         fields = currentResults[arr];
       }
-      if (query === 'countries' || query === 'cities') {
+      if (query === 'companies' || query === 'users') {
         fields = ['id'];
       }
       currentResults[query] = fields;
@@ -135,7 +135,7 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
       delete currentResults[arr];
     }
   }
-
+  console.log("current result at 138",currentResults)
   // RETURN STATEMENT FOR ALL
   return currentResults;
 };
@@ -145,7 +145,7 @@ const ResultsHelper = (newList, sub, query, id, currentResults) => {
 //======================================//
 
 /**
- * @param {Object} currentResults - looks like { countries: ['id', 'name', {'cities': ['id', 'name']}] }
+ * @param {Object} currentResults - looks like { companies: ['id', 'name', {'users': ['id', 'name']}] }
  */
 
 function CreateQueryStr(queryObject) {

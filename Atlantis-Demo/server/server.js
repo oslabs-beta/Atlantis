@@ -9,7 +9,7 @@ const schema = require('./schema/schema.js');
 
 const redis = require('redis');
 
-const PORT = process.env.PORT || '3000';
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, '../build/')));
 app.use(express.json());
@@ -20,8 +20,13 @@ const redisClient = redis.createClient({
   port: 12068,
   password: '6qwquugf9vXL2IVPCPs1avy7L89vLNq3',
 });
+// const redisClient = redis.createClient({
+//   host:'localhost',
+//   port: 6379
+// })
 
 app.use('/cachetest/', atlantis(redisClient, schema), (req, res) => {
+  console.log("backend hit!")
   res.json({ data: res.locals.graphQLResponse, time: res.locals.dif });
 });
 
@@ -65,7 +70,9 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500).send(res.locals.message);
 });
 
-app.listen(PORT); //listens on port 3000 -> http://localhost:3000/
+app.listen(PORT, ()=>{
+  console.log("listening to localhost 3000")
+}); //listens on port 3000 -> http://localhost:3000/
 
 // console.log('nodeENV is ', process.env.NODE_ENV);
 

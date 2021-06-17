@@ -6,6 +6,7 @@ import fast from '../assets/fast.svg';
 import QueryState from './QueryState.js';
 import Dial from './Dial.js';
 import Gauge from './Gauge.js';
+import { CreateQueryStr } from '../helpers/HelperFunctions.js';
 // input field that lets us query the route cache test.
 
 let start = 0;
@@ -13,19 +14,19 @@ let end = 0;
 let dif = 0;
 /////--------------------------- Custom state hook ---------------------------------/////
 
-const useInput = (init) => {
-  const [value, setValue] = useState(init);
-  const onChange = (e) => {
-    //setValue(state => ({ ...state, [type]: value }))
-    setValue(e.target.value);
-  };
-  // return the value with the onChange function instead of setValue function
-  return [value, onChange];
-};
+// const useInput = (init) => {
+//   const [value, setValue] = useState(init);
+//   const onChange = (e) => {
+//     //setValue(state => ({ ...state, [type]: value }))
+//     setValue(e.target.value);
+//   };
+//   // return the value with the onChange function instead of setValue function
+//   return [value, onChange];
+// };
 /////---------------------------Component starts here---------------------------------/////
 function Dashboard() {
   // const [query, setQuery] = useState(() => {});
-  const [queryInput, setQueryInput] = useInput();
+  const [queryInput, setQueryInput] = useState({ companies: ['company_id'] });
   const [responseTime, setResponseTime] = useState(0);
 
   let value;
@@ -39,11 +40,14 @@ function Dashboard() {
   }
 
   function sendQuery(queryInput) {
-    console.log('query input is', queryInput);
+
+    let parsedResult = CreateQueryStr(queryInput);
+    console.log('query input is', parsedResult);
+    console.log('type', typeof parsedResult);
     const body = {
-      query: '{companies{name}}',
+      query: parsedResult
     };
-    console.log('hard coded query is: ', body);
+    // console.log('hard coded query is: ', body);
     fetch(`/cachetest/`, {
       method: 'POST',
       headers: {
@@ -54,8 +58,9 @@ function Dashboard() {
     })
       .then((res) => res.json())
       .then((res) => {
-        setResponseTime(res.time)
-        //console.log('res is ', res);
+        console.log('res is ', res);
+        setResponseTime(res.time);
+
       })
       .catch((e) => console.log(e));
   }
