@@ -71,4 +71,5 @@ app.use('/graphql', atlantis(redisClient, schema), async (req, res) => {
 ## License
 
 This product is licensed under the MIT License - see the LICENSE.md file for details.‌
+
 This product is accelerated by OS Labs.
