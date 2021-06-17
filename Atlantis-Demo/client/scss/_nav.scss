@@ -27,6 +27,9 @@ header {
   letter-spacing: 7.2px;
   box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
     -6px -2px 30px rgba(0, 0, 0, 0.15);
+  a {
+    transition-duration: 50ms;
+  }
 }
 
 // #logo-main-container {
@@ -109,4 +112,50 @@ header {
   color: white;
   text-align: center;
   justify-content: center;
+  a:hover {
+    text-decoration: underline 0.05em;
+    transform: scale(1.07);
+  }
+  a:active {
+    color: white;
+  }
+}
+
+.npm-button {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 600;
+  font-size: 1.5em;
+  align-self: center;
+  width: 40%;
+  border: 0;
+  color: white;
+  padding: 2%;
+  // padding-top: 5%;
+  // padding-bottom: 5%;
+  border-radius: 10px 10px 10px 10px;
+  background-color: rgba(249, 249, 249, 0.3);
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  // a:hover {
+  //   text-decoration: underline;
+  //   transform: scale(1.5);
+  // }
+  // a:active {
+  //   color: white;
+  // }
+}
+.right a {
+  color: white;
+  text-decoration: none;
+}
+.right a :link {
+  color: white;
+}
+.right a :hover {
+  text-decoration: underline;
+  transform: scale(1.5);
+}
+.right a :active {
+  color: white;
 }

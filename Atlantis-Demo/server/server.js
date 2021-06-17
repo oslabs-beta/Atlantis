@@ -21,12 +21,12 @@ const redisClient = redis.createClient({
   password: '6qwquugf9vXL2IVPCPs1avy7L89vLNq3',
 });
 // const redisClient = redis.createClient({
-//   host:'localhost',
-//   port: 6379
-// })
+//   host: 'localhost',
+//   port: 6379,
+// });
 
 app.use('/cachetest/', atlantis(redisClient, schema), (req, res) => {
-  console.log("backend hit!")
+  console.log('backend hit!');
   res.json({ data: res.locals.graphQLResponse, time: res.locals.dif });
 });
 
@@ -70,8 +70,8 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500).send(res.locals.message);
 });
 
-app.listen(PORT, ()=>{
-  console.log("listening to localhost 3000")
+app.listen(PORT, () => {
+  console.log('listening to localhost 3000');
 }); //listens on port 3000 -> http://localhost:3000/
 
 // console.log('nodeENV is ', process.env.NODE_ENV);

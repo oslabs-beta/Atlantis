@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import MinusDark from '../assets/minus_dark.svg'
-import MinusHover from '../assets/minus_light.svg'
+import MinusDark from '../assets/minus_dark.svg';
+import MinusHover from '../assets/minus_light.svg';
 // import images
 // import MinusHover fro
 
@@ -12,9 +12,9 @@ const TypeField = (props) => {
   const { item, deleteItem, subQuery } = props;
 
   // Below is so that we don't render the minus button for the id field
-  const [itemIsId, setItemIsId] =useState(false);
+  const [itemIsId, setItemIsId] = useState(false);
   useEffect(() => {
-    if (item === 'id') setItemIsId(true);
+    if (item === 'user_id') setItemIsId(true);
   }, [itemIsId]);
 
   const tab = <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>,

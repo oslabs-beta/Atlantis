@@ -1,4 +1,3 @@
- 
 /**
  * @param {Array} newList - Array of query fields
  * @param {Array} sub - Array of query fields in the sub-query (aka "users" in "companies")
@@ -26,7 +25,7 @@
 */
 
 const ResultsHelper = (newList, sub, query, id, currentResults) => {
-console.log("newList, sub, query, id, current", newList, sub, query, id, currentResults)
+  // console.log("newList, sub, query, id, current", newList, sub, query, id, currentResults)
   for (let arr in currentResults) {
     //===========================//
     //===Alters the main array===//
@@ -56,7 +55,7 @@ console.log("newList, sub, query, id, current", newList, sub, query, id, current
 
       // if new list has it but we don't, we're adding it with the default initial values
       if (alreadyHaveUsers === false && newListHasUsers === true) {
-        currentList.push({ users: ['id'] });
+        currentList.push({ users: ['user_id'] });
       }
 
       currentResults[arr] = currentList; // if no users, this doesn't get altered
@@ -135,7 +134,7 @@ console.log("newList, sub, query, id, current", newList, sub, query, id, current
       delete currentResults[arr];
     }
   }
-  console.log("current result at 138",currentResults)
+  // console.log('current result at 138', currentResults);
   // RETURN STATEMENT FOR ALL
   return currentResults;
 };

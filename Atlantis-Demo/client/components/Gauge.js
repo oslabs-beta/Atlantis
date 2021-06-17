@@ -17,12 +17,19 @@ const styles = {
 };
 
 const Gauge = ({ responseTime }) => {
-  let percent = responseTime / 700;
+  // console.log('res time1 is :', responseTime);
   const maxGuage = (resT) => {
     if (resT > 650) {
       return (resT = 650);
     }
+    return resT;
   };
+  responseTime = maxGuage(responseTime);
+  // console.log('res time is :', responseTime);
+  let resCopy = responseTime.toFixed(2);
+  // console.log('rescopy', resCopy);
+  let percent = responseTime / 700;
+  // console.log('percent is', percent);
   return (
     <div style={styles.dial}>
       <GaugeChart
@@ -31,7 +38,7 @@ const Gauge = ({ responseTime }) => {
         arcWidth={0.5}
         percent={percent}
         textColor={'#000000'}
-        formatTextValue={(responseTime) => responseTime + ' mil'}
+        formatTextValue={(percent) => resCopy + ' ms'}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Speedometer from './Speedometer.js';
-import page_brk from '../assets/page_brk.svg'
+import page_brk from '../assets/page_brk.svg';
 import persisted from '../assets/persisted.svg';
 import fast from '../assets/fast.svg';
 import QueryState from './QueryState.js';
@@ -31,21 +31,28 @@ function Dashboard() {
 
   let value;
 
-  function setPercent (value) {
-    if(responseTime > 30){
-      return value = 99.5
+  function setPercent(value) {
+    if (responseTime > 30) {
+      return (value = 99.5);
     } else {
-      return 0
+      return 0;
+    }
+  }
+
+  function isCached() {
+    if (responseTime > 30) {
+      return false;
+    } else {
+      return true;
     }
   }
 
   function sendQuery(queryInput) {
-
     let parsedResult = CreateQueryStr(queryInput);
-    console.log('query input is', parsedResult);
-    console.log('type', typeof parsedResult);
+    let parseResultWithUsers = parsedResult.replace('users', 'employees');
+    // console.log('type', typeof parsedResult);
     const body = {
-      query: parsedResult
+      query: parseResultWithUsers,
     };
     // console.log('hard coded query is: ', body);
     fetch(`/cachetest/`, {
@@ -58,9 +65,8 @@ function Dashboard() {
     })
       .then((res) => res.json())
       .then((res) => {
-        console.log('res is ', res);
+        // console.log('res is ', res);
         setResponseTime(res.time);
-
       })
       .catch((e) => console.log(e));
   }
@@ -71,24 +77,30 @@ function Dashboard() {
 
   return (
     <>
-     <img src={page_brk} />
+      <img src={page_brk} />
       <h1>Atlantis Metrics</h1>
       <div className="queryField">
         <div id="field">
-          <h4>Make a Request to Cache your speed Gains</h4>
+          <h3>Make a Request to Cache your speed Gains</h3>
+          <h5>
+            Clear Cache before beginning! Let's go! <br /> Make an initial query
+            to see the time to fetch from database
+            <br />
+            Then make a query again to the the speed of Atlantis Caching
+          </h5>
+
           <div id="window">
             <QueryState queryInput={queryInput} setQueryInput={setQueryInput} />
           </div>
-          <p>Atlantis Query</p>
 
           {/* ============___________Query Buttons___________============*/}
           <div className="buttonDash">
-            <input
+            {/* <input
               className="input"
               id="queryOutput"
               type="queryOutput"
               value={responseTime || 'Response Time'}
-            ></input>
+            ></input> */}
             <div>
               <button
                 className="submitButton"
@@ -110,10 +122,10 @@ function Dashboard() {
               >
                 Clear Cache{' '}
               </button>
-              <button className="submitButton" id="rest">
+              {/* <button className="submitButton" id="rest">
                 {' '}
                 Reset{' '}
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -127,21 +139,20 @@ function Dashboard() {
           </div>
           <div className="metricDash">
             <div id="metric">
-              <h2> 0-100% </h2>
               <img className="metric-logo" src={persisted} alt="persist" />
-              <h5>200x speed </h5>
+              <h5>200x faster </h5>
             </div>
             <div id="metric">
-              <h2> 0-100% </h2>
               <img className="metric-logo" src={fast} alt="persist" />
               <h5>reduced server load </h5>
             </div>
             <div id="metric">
-              <h2>0-100% </h2>
               <Dial
                 value={value}
                 responseTime={responseTime}
                 setPercent={setPercent}
+                isCached={isCached}
+                className="dial"
               />
             </div>
           </div>

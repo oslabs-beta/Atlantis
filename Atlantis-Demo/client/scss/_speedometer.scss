@@ -59,9 +59,13 @@ canvas {
     -6px -2px 30px rgba(0, 0, 0, 0.15);
   border-radius: 5%;
   padding: 0;
+  // align-self: center;
   margin: 1%;
   h5 {
     margin: 0%;
+  }
+  img {
+    padding-top: 30%;
   }
 }
 #metric:hover {
@@ -79,4 +83,26 @@ canvas {
 .style {
   animation: true;
   animation-duration: 1000ms;
+}
+#dial {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 200px;
+  width: 200px;
+  box-shadow: -6px -2px 30px rgba(255, 255, 255, 0.15),
+    -6px -2px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 5%;
+  // padding-top: 30%;
+  // align-self: center;
+  margin: 1%;
+  h5 {
+    margin: 0%;
+  }
+  img {
+    padding-top: 30%;
+  }
+}
+#dial-down {
+  padding-top: 25%;
 }
