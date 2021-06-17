@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { arc } from "d3-shape";
-import { scaleLinear } from "d3-scale";
-import { format } from "d3-format";
-import { timeMillisecond } from "d3";
-
+import React, { useState } from 'react';
+import { arc } from 'd3-shape';
+import { scaleLinear } from 'd3-scale';
+import { format } from 'd3-format';
+import { timeMillisecond } from 'd3';
 
 const Dial = ({
   value,
@@ -12,39 +11,36 @@ const Dial = ({
   label,
   units = timeMillisecond,
   responseTime,
-  setPercent
+  setPercent,
 }) => {
-  console.log(value, 'here is respone time');
-  // const [ coords, setCoords ] = useState(0);
+  const [cached, setCached] = useState(false);
 
   // set state to invoke getCoords
 
-  //  || state to boolen, triggered or not triggered, if 
+  //  || state to boolen, triggered or not triggered, if
   //if runtime > 30s, not cached yet, else, it has been cached and can set to true
   // if state false, then ! getcoords on arc
   // once setPercent invoked and changed to 99.5
   // it will invoke State since conditional will be true
   // and true invokes getCoordsOnArc
 
-  
-  
   // console.log(newVal, 'newVal is here 1'); // undef
-  // const newVal = setPercent(value)  //99.5 
+  // const newVal = setPercent(value)  //99.5
 
   // let triggered;
 
-  // console.log(triggered,' here is triggered 1'); 
+  // console.log(triggered,' here is triggered 1');
   // if (newVal === 99.5) {
 
   //   if (triggered) {
   //     console.log('entered coords');
-      
+
   //   }
 
   //   console.log('here is market');
   //   triggered = true;
   // }
-  // console.log(triggered,' here is triggered'); 
+  // console.log(triggered,' here is triggered');
 
   // console.log(newVal, 'newVal is here 2'); // 0, 99.5
   const backgroundArc = arc()
@@ -73,23 +69,22 @@ const Dial = ({
 
   const colorScale = scaleLinear()
     .domain([0, 1, 2, 3])
-    .range(["#9B554E", "#67EFE5", "#A6FFF8", "#A6FFF8"]);
+    .range(['#9B554E', '#67EFE5', '#A6FFF8', '#A6FFF8']);
 
   const gradientSteps = colorScale.ticks(10).map((value) => colorScale(value));
 
   const markerLocation = getCoordsOnArc(angle, 1 - (1 - 0.65) / 2);
- 
 
   return (
     <div
       style={{
-        textAlign: "center"
+        textAlign: 'center',
       }}
     >
       <svg
-        style={{ overflow: "visible" }}
+        style={{ overflow: 'visible' }}
         width="9em"
-        viewBox={[-1, -1, 2, 1].join(" ")}
+        viewBox={[-1, -1, 2, 1].join(' ')}
       >
         <defs>
           <linearGradient
@@ -129,24 +124,24 @@ const Dial = ({
 
       <div
         style={{
-          marginTop: "0.4em",
-          fontSize: "2em",
-          lineHeight: "1em",
-          fontWeight: "900",
-          fontFeatureSettings: "'zero', 'tnum' 1"
+          marginTop: '0.4em',
+          fontSize: '2em',
+          lineHeight: '1em',
+          fontWeight: '900',
+          fontFeatureSettings: "'zero', 'tnum' 1",
         }}
       >
-        {format(",")(value)}
+        {format(',')(value)}
       </div>
 
       {!!label && (
         <div
           style={{
-            color: "#8b8ba7",
-            marginTop: "0.6em",
-            fontSize: "1.3em",
-            lineHeight: "1.3em",
-            fontWeight: "700"
+            color: '#8b8ba7',
+            marginTop: '0.6em',
+            fontSize: '1.3em',
+            lineHeight: '1.3em',
+            fontWeight: '700',
           }}
         >
           {label}
@@ -156,9 +151,9 @@ const Dial = ({
       {!!units && (
         <div
           style={{
-            color: "#8b8ba7",
-            lineHeight: "1.3em",
-            fontWeight: "300"
+            color: '#8b8ba7',
+            lineHeight: '1.3em',
+            fontWeight: '300',
           }}
         >
           {units}
@@ -168,11 +163,9 @@ const Dial = ({
   );
 };
 
-
 const getCoordsOnArc = (angle, offset = 10) => [
   Math.cos(angle - Math.PI / 2) * offset,
-  Math.sin(angle - Math.PI / 2) * offset
+  Math.sin(angle - Math.PI / 2) * offset,
 ];
-
 
 export default Dial;

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TypeField from './TypeField.js';
 import DropDownItem from './DropDownItem.js';
-// imported images
-
 import Plus from '../assets/plus_light.svg';
+import PlusHover from '../assets/plus_dark.svg';
 
 /*
   - This component renders each field in your query
@@ -12,7 +11,8 @@ import Plus from '../assets/plus_light.svg';
 */
 
 const UsersFields = (props) => {
-  console.log('UsersFields');
+  console.log(props, 'userFields ');
+
   const { usersFields, type, outputFunction, modifyUsersFields } = props; // import props
 
   const [queryList, setQueryList] = useState(usersFields);
@@ -50,10 +50,10 @@ const UsersFields = (props) => {
     setAvailableList(convertIntoList(userFields));
   }, []);
 
-  const userType = [
-    { user_id: 'string' },
+  const userFields = [
     // { id: "string" }, // commented out because we're making it an immutable field
     { name: 'string' },
+    { company_id: 'string' },
   ];
 
   // Takes the items list and returns something like: [ id, name, capital, cities ]
@@ -69,8 +69,8 @@ const UsersFields = (props) => {
   //======= Minus button ========//
   function deleteItem(item) {
     // execute a function back in query fields to update list, which in turn will update this component
-    console.log('DELTE');
-    modifyUsersFields(item, 'delete');
+    // console.log('DELTE');
+    // modifyUsersFields(item, 'delete');
 
     // remove item from queryList
     const newList = [...queryList];
@@ -89,7 +89,7 @@ const UsersFields = (props) => {
   function addItem(item) {
     console.log('ADD ITEM HIT!');
     modifyUsersFields(item, 'add');
-
+    console.log('item git', item);
     // add item to queryList
     const newList = [...queryList];
     newList.push(item);
@@ -103,7 +103,7 @@ const UsersFields = (props) => {
     togglePlusDropdown(false);
     // call a function that prepares the query for actually being sent
     outputFunction(0, newList, 0);
-    console.log('ADD ITEM exist!');
+    // console.log('ADD ITEM exist!');
   }
 
   // Fires when you click plus -- only show plus dropdown if there's something in the list
@@ -136,6 +136,7 @@ const UsersFields = (props) => {
 
   // Render dropdown menu from the available list
   const dropdown = availableList.map((item, i) => {
+    console.log('item', item);
     return (
       <DropDownItem func={addItem} item={item} key={`Available${type}${i}`} />
     );
@@ -153,8 +154,8 @@ const UsersFields = (props) => {
       {!!availableList.length && (
         <button className="plus-button" onClick={dropPlus}>
           <div className="plus-minus-icons">
-            {/* <img src={Plus} /> */}
-            <img src={Plus} className="hover-button" />
+            <img src={Plus} />
+            <img src={PlusHover} className="hover-button" />
           </div>
           {plusDropdown && (
             <div className="dropdown-menu" ref={ref}>

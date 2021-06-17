@@ -5,7 +5,7 @@ import { format } from 'd3-format';
 import { timeMillisecond } from 'd3';
 
 const Dial = ({
-  value = 0,
+  value = 99.5,
   min = 0,
   max = 100,
   label,
@@ -14,7 +14,7 @@ const Dial = ({
   setPercent,
   isCached,
 }) => {
-  console.log(value, 'here is value in dial');
+  // console.log(value, 'here is value in dial');
   const [cached, setCached] = useState(isCached);
 
   const onChange = (value) => {
@@ -23,7 +23,7 @@ const Dial = ({
       return setPercent(value);
     }
   };
-  console.log(value, 'here is value in dial2');
+  // console.log(value, 'here is value in dial2');
 
   const backgroundArc = arc()
     .innerRadius(0.65)
@@ -59,6 +59,7 @@ const Dial = ({
 
   return (
     <div
+      id="dial-down"
       style={{
         textAlign: 'center',
       }}
@@ -107,15 +108,14 @@ const Dial = ({
       <div
         style={{
           marginTop: '0.4em',
-          fontSize: '2em',
+          fontSize: '1em',
           lineHeight: '1em',
           fontWeight: '900',
           fontFeatureSettings: "'zero', 'tnum' 1",
         }}
       >
-        {format(',')(() => {
-          onChange(value);
-        })}
+        <h4> </h4>
+        {format(',')(value) + '% faster'}
       </div>
 
       {!!label && (

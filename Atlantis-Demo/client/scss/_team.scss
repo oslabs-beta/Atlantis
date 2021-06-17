@@ -4,7 +4,6 @@
   justify-content: center;
   width: 80vw;
   padding-bottom: 5%;
-
 }
 
 .social {
@@ -13,13 +12,12 @@
   height: 80%;
   justify-content: center;
   align-items: center;
-  flex: 0 0 25%;  
-
+  flex: 0 0 25%;
 }
 .member-cards {
   display: flex;
   flex-direction: row;
-  
+
   img {
     width: 150px;
   }
@@ -40,22 +38,19 @@
     margin: 0;
   }
 }
-#team-logo-icon{
+#team-logo-icon {
   display: flex;
   margin: 5px;
   height: 60px;
   width: 60px;
-
 }
 #logo-main-container {
   display: flex;
   justify-content: center;
-
 }
 #logo-main {
   height: 60px;
   margin-left: 35px;
-
 }
 .team-social-container {
   display: flex;
@@ -63,16 +58,23 @@
   align-items: center;
   font-size: 25px;
   padding-bottom: 5%;
-
 }
-.team-social-icons{
+.team-social-icons {
   display: flex;
   justify-content: center;
-
 }
 .team-social {
   display: flex;
   justify-content: center;
   margin: 5%;
-
+}
+#team-container {
+  p {
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    align-self: center;
+    font-size: 12px;
+    // margin-left: 50%;
+  }
 }

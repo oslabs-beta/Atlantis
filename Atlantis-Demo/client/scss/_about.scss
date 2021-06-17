@@ -24,7 +24,7 @@
   justify-content: center;
   align-items: center;
   h2 {
-    margin: 0;
+    // font-size: 20px;
   }
 }
 .about-right {
@@ -33,19 +33,21 @@
   height: 100%;
   width: 50%;
   color: $mainBlue;
-  text-align: center;
   justify-content: center;
   padding: 2%;
   h1 {
-    font-size: 90px;
-    margin-bottom: 0;
+    text-align: end;
+    font-size: 70px;
+
+    margin-bottom: 1%;
+    padding-right: 12%;
   }
-  h3 {
-    margin: 0;
-  }
+
   img {
+    padding-left: 25%;
     align-self: center;
     width: 60%;
+    padding-right: 12%;
   }
 }
 
@@ -58,7 +60,7 @@
   text-align: center;
   justify-content: center;
   h1 {
-    font-size: 75px;
+    font-size: 60px;
     margin-bottom: 0;
   }
 
@@ -102,13 +104,22 @@
   color: $mainBlue;
   text-align: center;
   justify-content: center;
+  align-items: center;
   padding: 2%;
   h1 {
-    font-size: 75px;
+    font-size: 60px;
     margin-bottom: 0;
   }
   h3 {
     margin: 0;
+  }
+  img {
+    padding-left: 3%;
+    width: 60%;
+    margin: 2%;
+    margin-top: 8%;
+    margin-bottom: 20%;
+    // align-self: center;
   }
 }
 .server {

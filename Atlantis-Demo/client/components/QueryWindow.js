@@ -4,13 +4,16 @@ import DropDownItem from './DropDownItem';
 import UsersFields from './UsersFields';
 import Plus from '../assets/plus_light.svg';
 import PlusHover from '../assets/plus_dark.svg';
+import Minus from '../assets/minus_light.svg';
+import MinusHover from '../assets/minus_dark.svg';
+
 const QueryWindow = (props) => {
   const { type, outputFunction } = props; // import props
 
   const [queryList, setQueryList] = useState(['company_id']);
   const [availableList, setAvailableList] = useState([]);
   const [plusDropdown, togglePlusDropdown] = useState(false);
-  const [usersFields, setUsersFields] = useState(['id']);
+  const [usersFields, setUsersFields] = useState(['user_id']);
 
   // ______________________________________________________________________ //
   // ________ Functionality to close dropdowns when you click away ________  //
@@ -56,7 +59,7 @@ const QueryWindow = (props) => {
     // { id: "string" },
     { name: 'string' },
     { description: 'string' },
-    // { employees: [{'string'}] },// if field is array, point to the list of fields
+    { users: usersType }, // if field is array, point to the list of fields
   ];
 
   // Decides whether to populate dropdowns with Company or User fields, based on type prop
@@ -141,6 +144,7 @@ const QueryWindow = (props) => {
   const queriedItems = queryList.map((item, i) => {
     // If querying "users", need to open up a new pair of brackets and recursively call TypeFields to generate users fields
     if (item === 'users') {
+      console.log('userfields', usersFields);
       return (
         <div key={i}>
           <div className="queryLine">
@@ -152,7 +156,7 @@ const QueryWindow = (props) => {
                 <img src={MinusHover} className="hover-button" />
               </div>
             </button>
-            {space}users{space}
+            {space}employees{space}
             {ob}
           </div>
           <div className="queryLine">

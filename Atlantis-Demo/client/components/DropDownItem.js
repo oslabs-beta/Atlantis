@@ -5,7 +5,7 @@ import React from 'react';
 */
 
 const DropDownItem = (props) => {
-  console.log('hitting a dropdown item!');
+  // console.log('hitting a dropdown item!');
   const { func, item } = props;
   return (
     <>

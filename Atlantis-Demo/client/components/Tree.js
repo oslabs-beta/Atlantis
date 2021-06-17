@@ -1,66 +1,63 @@
-import React from "react";
+import React from 'react';
 
-import Tree from "react-tree-graph";
+import Tree from 'react-tree-graph';
 
 const data = {
-  name: "Client",
+  name: 'Client',
   children: [
     {
-      name: "GraphQL",
-      description: "Request Response sent on single endpoint, only receiving what you asked for",
+      name: 'GraphQL',
+      description:
+        'Request Response sent on single endpoint, only receiving what you asked for',
       free: true,
       children: [
         {
-          name: "Server",
-          description:
-            "where the magic happens",
+          name: 'Server',
+          description: 'where the magic happens',
           free: true,
           children: [
             {
-              name: "Atlantis Cache",
-              description:
-                "greatest npm package released",
+              name: 'Atlantis Cache',
+              description: 'greatest npm package released',
               free: true,
               children: [
                 {
-                  name: "Pub/Sub",
+                  name: 'Pub/Sub',
                   description:
-                    "single source of truth broker takes care of distributing new info",
+                    'single source of truth broker takes care of distributing new info',
                   free: true,
                   children: [
                     {
-                      name: "Companies",
-                      description:
-                        "table",
-                     
-                      free: true
+                      name: 'Companies',
+                      description: 'table',
+
+                      free: true,
                     },
                     {
-                      name: "Employees",
-                      description:
-                        "table",
-                      free: true
+                      name: 'Employees',
+                      description: 'table',
+                      free: true,
                     },
                     {
-                      name: "Projects",
-                      description: "table",
-                      free: true
-                    }
-                  ]
-                }
-              ]
+                      name: 'Projects',
+                      description: 'table',
+                      free: true,
+                    },
+                  ],
+                },
+              ],
             },
             {
-              name: "Database",
+              name: 'Database',
               description:
-                "For maximum flexibility, custom coding is the way to go. These libraries will lend a hand.",
-              free: true
-            }
-          ]
-        }
-      ]
-    }
-  ]
+                'For maximum flexibility, custom coding is the way to go. These libraries will lend a hand.',
+              free: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 // {
 //   name: "Atlantis Cache",
@@ -119,11 +116,11 @@ function clickHandler(event, node) {
 
 function mouseDown(event, node) {
   samenode = node;
-  console.log(`mouse click down ${node}!`);
+  // console.log(`mouse click down ${node}!`);
 }
 
 function mouseUp(event, node) {
-  console.log(`mouse click up ${node}!`);
+  // console.log(`mouse click up ${node}!`);
   if (samenode && samenode !== node) {
     alert(`${samenode} moved to ${node}`);
   }
@@ -132,24 +129,23 @@ function mouseUp(event, node) {
 export default function App() {
   return (
     <div className="tree-div">
-    
       <h1>Follow the Data</h1>
-        <h2>Flow of Request sent from Client to Server</h2>
+      <h2>Flow of Request sent from Client to Server</h2>
       <Tree
         className="tree"
         data={data}
-        height={600}
-        width={1300}
+        height={500}
+        width={1000}
         margins={{ top: 20, bottom: 10, left: 20, right: 200 }}
         gProps={{
           onClick: clickHandler,
           onContextMenu: onRightClick,
           onMouseDown: mouseDown,
-          onMouseUp: mouseUp
+          onMouseUp: mouseUp,
         }}
         animated
         svgProps={{
-          className: "custom",
+          className: 'custom',
           // transform: 'rotate(90)'
         }}
       />
