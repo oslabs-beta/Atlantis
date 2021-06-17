@@ -5,7 +5,6 @@
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
 <a href="https://github.com/oslabs-beta/Atlantis/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/oslabs-beta/Atlantis"></a>
  <a href="https://www.npmjs.com/package/atlantis-cache"> <img alt="npm" src="https://img.shields.io/npm/v/atlantis-cache"></a>
-  <a href="https://github.com/oslabs-beta/Atlantis/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/oslabs-beta/Atlantis"></a>
 
 
 </div>
