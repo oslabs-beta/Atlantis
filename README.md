@@ -18,6 +18,9 @@ Atlantis is a light-weight library that leverages Redis key-value store to dynam
 
 This package is meant to work in conjunction with Redis. For more information about Redis: check out: <a href ="https://redis.io/">Redis</a>
 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![atlantis_demo](https://user-images.githubusercontent.com/36866275/122622799-79457e00-d05f-11eb-9d00-564df61f9289.gif)
+
+
 ## Getting Started
 
 ### 1. Installing and Connecting to a Redis Server
