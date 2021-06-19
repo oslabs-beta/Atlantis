@@ -14,7 +14,7 @@
 
 ## About
 
-Atlantis is a light-weight library that solves the issue of storing and maintaining deeply-nested GraphQL queries This ensures the client always receives the most relevant data as mutations are made to the database.
+Atlantis is a light-weight library that solves the issue of storing and maintaining deeply-nested GraphQL queries. This ensures the client always receives the most relevant data as mutations are made to the database.
 Atlantis leverages Redis’s ‘in-memory’ quick lookup time to rapidly serve up cached graphQL responses regardless of size or structure.Redis integration along with Pub/Sub architecture also allows for scaling as your needs grow and you require more cache space or backup cache workers. New queries that bare resemblance to previous queries, are intelligently pulled from the existing cached nesting instead of creating a new key/value entry.
 
 This package is meant to work in conjunction with Redis. For more information about Redis: check out: <a href ="https://redis.io/">Redis</a>
