@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Speedometer from './Speedometer.js';
 import page_brk from '../assets/page_brk.svg';
 import persisted from '../assets/persisted.svg';
@@ -28,6 +28,10 @@ function Dashboard() {
   // const [query, setQuery] = useState(() => {});
   const [queryInput, setQueryInput] = useState({ companies: ['company_id'] });
   const [responseTime, setResponseTime] = useState(0);
+
+  useEffect(() => {
+    fetch('/clearcache/');
+  }, []);
 
   let value;
 

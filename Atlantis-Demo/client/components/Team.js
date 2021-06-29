@@ -49,7 +49,7 @@ function Team() {
       <div className="social">
         <div className="member-cards">
           <div className="personal">
-            <h3>Erik Matevosyan</h3>
+            <h3 id="erikM">Erik Matevosyan</h3>
             <img src={Erik} />
             <div className="links">
               <a href="https://github.com/erik-matevosyan" target="_blank">
