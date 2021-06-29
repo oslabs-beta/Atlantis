@@ -65,7 +65,7 @@ const QueryWindow = (props) => {
   // Decides whether to populate dropdowns with Company or User fields, based on type prop
   const initialAvailableList = () => {
     if (type === 'Company') return convertIntoList(companyType);
-    if (type === 'User') return convertIntoList(usersType);
+    if (type === 'User')  return convertIntoList(usersType);
   };
 
   // Takes the items list and returns something like: [ id, name, description, users ]
@@ -112,7 +112,7 @@ const QueryWindow = (props) => {
   // Add item to users field
   // Delete item from users field
   const modifyUsersFields = (item, addOrDelete) => {
-    const newFields = [...usersFields];
+    let newFields = [...usersFields];
     if (addOrDelete === 'add') {
       newFields.push(item);
     }

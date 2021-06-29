@@ -1,11 +1,9 @@
 <div  align="center">
-<<<<<<< HEAD
-<img src="https://imgur.com/MNeHJ9y" width="300px" align="center"/>
-  <h1>Atlantis Cache</h1>
-=======
-<img src="https://github.com/settnaing199/npm-package-test/blob/main/atlantis.jpeg" width="500px" align="center"/>
+
+<img src="https://github.com/oslabs-beta/Atlantis/blob/master/Readme_banner.png" width="800px" align="center"/>
+
   <h1>Atlantis-Cache</h1>
->>>>>>> 3f6707a37f4f8b6ae40f6170d06598dfc00f2947
+
   <p>Light-weight server-side caching solution for GraphQL.</p>
 <a href="https://github.com/oslabs-beta/Atlantis/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/oslabs-beta/Atlantis"></a>
  <a href="https://www.npmjs.com/package/atlantis-cache"> <img alt="npm" src="https://img.shields.io/npm/v/atlantis-cache"></a>
@@ -16,9 +14,13 @@
 
 ## About
 
-Atlantis is a light-weight library that leverages Redis key-value store to dynamically cache GraphQL queries as responses. Atlantis is able to dynamically store deeply-nested queries and maintain the most recent and relevant data as mutations are made to the database. Queries that are more shallow and within the scope of previous queries are pulled directly from the cache, offering further flexibility and precision, without additional network requests or overriding previous key-values.
+Atlantis is a light-weight library that solves the issue of storing and maintaining deeply-nested GraphQL queries. This ensures the client always receives the most relevant data as mutations are made to the database.
+Atlantis leverages Redis’s ‘in-memory’ quick lookup time to rapidly serve up cached graphQL responses regardless of size or structure.Redis integration along with Pub/Sub architecture also allows for scaling as your needs grow and you require more cache space or backup cache workers. New queries that bare resemblance to previous queries, are intelligently pulled from the existing cached nesting instead of creating a new key/value entry.
 
 This package is meant to work in conjunction with Redis. For more information about Redis: check out: <a href ="https://redis.io/">Redis</a>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![atlantis_demo](https://user-images.githubusercontent.com/36866275/122622799-79457e00-d05f-11eb-9d00-564df61f9289.gif)
+
 
 ## Getting Started
 

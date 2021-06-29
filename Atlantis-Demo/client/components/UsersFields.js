@@ -13,7 +13,7 @@ import PlusHover from '../assets/plus_dark.svg';
 const UsersFields = (props) => {
   const { usersFields, type, outputFunction, modifyUsersFields } = props; // import props
 
-  const [queryList, setQueryList] = useState(usersFields);
+  const [queryList, setQueryList] = useState(['user_id']);
   const [availableList, setAvailableList] = useState([]);
   const [plusDropdown, togglePlusDropdown] = useState(false);
 
@@ -67,7 +67,7 @@ const UsersFields = (props) => {
   //======= Minus button ========//
   function deleteItem(item) {
     // execute a function back in query fields to update list, which in turn will update this component
-    // console.log('DELTE');
+    console.log('DELTE');
     // modifyUsersFields(item, 'delete');
 
     // remove item from queryList
@@ -95,11 +95,12 @@ const UsersFields = (props) => {
     const index = newAvailablelist.indexOf(item);
     newAvailablelist.splice(index, 1);
     setAvailableList(newAvailablelist);
+
     // close the plus dropdown
     togglePlusDropdown(false);
     // call a function that prepares the query for actually being sent
     outputFunction(0, newList, 0);
-    // console.log('ADD ITEM exist!');
+    console.log('ADD ITEM exist!');
   }
 
   // Fires when you click plus -- only show plus dropdown if there's something in the list
@@ -131,13 +132,15 @@ const UsersFields = (props) => {
   });
 
   // Render dropdown menu from the available list
-  const dropdown = availableList.map((item, i) => {
+  let dropdown = availableList.map((item, i) => {
     console.log('item', item);
     return (
       <DropDownItem func={addItem} item={item} key={`Available${type}${i}`} />
     );
   });
-
+  dropdown = [...new Set(dropdown)];
+  console.log(dropdown, 'here id DD');
+  
   return (
     <>
       {/* List all the chosen query fields */}
