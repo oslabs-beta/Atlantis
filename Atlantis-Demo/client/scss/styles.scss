@@ -257,6 +257,13 @@ label {
     position: relative;
     width: 90vw;
     padding: 2%;
+    img {
+      width: 100vw;
+    }
+  }
+  #meter {
+    display: flex;
+    flex-wrap: wrap;
   }
   .metricDash {
     display: flex;
@@ -288,7 +295,6 @@ label {
     display: flex;
     flex-wrap: wrap;
   }
-
   .about-container {
     display: flex;
     flex-wrap: wrap;
@@ -349,7 +355,15 @@ label {
     padding-bottom: 5px;
     font-size: 16.9px;
   }
-  .tree-div {
+  .tree-div,
+  .aniArrow {
     display: none !important;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .query-div {
+    padding-top: 8%;
+    padding-left: 4%;
   }
 }
