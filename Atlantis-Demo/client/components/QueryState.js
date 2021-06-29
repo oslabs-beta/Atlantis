@@ -195,7 +195,7 @@ const QueryState = (props) => {
         </div>
 
         {/* Close out the query */}
-        <div className="queryLine">
+        <div className="queryLine"> 
           {tab} {cb}
         </div>
         <div className="queryLine">{cb}</div>

@@ -49,12 +49,15 @@ function Dashboard() {
 
   function sendQuery(queryInput) {
     let parsedResult = CreateQueryStr(queryInput);
-    let parseResultWithUsers = parsedResult.replace('users', 'employees');
-    // console.log('type', typeof parsedResult);
+
+    if (parsedResult.includes('companies')) {
+      parsedResult = parsedResult.replace('users', 'employees');
+    }
+    console.log('type', typeof parsedResult);
     const body = {
-      query: parseResultWithUsers,
+      query: parsedResult,
     };
-    // console.log('hard coded query is: ', body);
+    console.log('hard coded query is: ', body);
     fetch(`/cachetest/`, {
       method: 'POST',
       headers: {
