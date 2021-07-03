@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Speedometer from './Speedometer.js';
 import page_brk from '../assets/page_brk.svg';
 import persisted from '../assets/persisted.svg';
@@ -29,6 +29,10 @@ function Dashboard() {
   const [queryInput, setQueryInput] = useState({ companies: ['company_id'] });
   const [responseTime, setResponseTime] = useState(0);
 
+  useEffect(() => {
+    fetch('/clearcache/');
+  }, []);
+
   let value;
 
   function setPercent(value) {
@@ -53,11 +57,11 @@ function Dashboard() {
     if (parsedResult.includes('companies')) {
       parsedResult = parsedResult.replace('users', 'employees');
     }
-    console.log('type', typeof parsedResult);
+
     const body = {
       query: parsedResult,
     };
-    console.log('hard coded query is: ', body);
+
     fetch(`/cachetest/`, {
       method: 'POST',
       headers: {
