@@ -15,10 +15,10 @@ app.use(express.static(path.join(__dirname, '../build/')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// const redisClient = redis.createClient({
-//   host: 'localhost',
-//   port: 6379,
-// });
+const redisClient = redis.createClient({
+  host: 'localhost',
+  port: 6379,
+});
 
 app.use('/cachetest/', atlantis(redisClient, schema), (req, res) => {
   console.log('backend hit!');
