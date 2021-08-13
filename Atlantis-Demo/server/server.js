@@ -15,11 +15,6 @@ app.use(express.static(path.join(__dirname, '../build/')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const redisClient = redis.createClient({
-  host: 'redis-12068.c244.us-east-1-2.ec2.cloud.redislabs.com',
-  port: 12068,
-  password: '6qwquugf9vXL2IVPCPs1avy7L89vLNq3',
-});
 // const redisClient = redis.createClient({
 //   host: 'localhost',
 //   port: 6379,
